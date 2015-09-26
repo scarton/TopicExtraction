@@ -11,10 +11,12 @@
     <script src="assets/js/trainer.js"></script>
     <script src="assets/js/enscroll-0.6.1.min.js"></script>
     <script src="assets/js/jqcloud.js"></script>
+    <script src="assets/js/vendor/jquery.log.js"></script>
     <script src="assets/js/vendor/jquery-ui.min.js" type="text/javascript" charset="utf-8"></script>
     <script src="assets/js/tag-it.js" type="text/javascript" charset="utf-8"></script>
     <script>
 	    $(document).ready(function() {
+	    	$.setLogging(true);
 	    	setBindings();
 	        getRandomDoc("doc-name","document-content");
 	        makeDocBoxScrollBar("document-content");

@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -24,10 +26,11 @@ public class Sources {
 	private static final String JSON_ELEMENT="html";
 	private static final String TRUTH_EXT=".key";
 	private static final String SOURCE_EXT=".json";
+	private static final String[] FAKE_TRUTH={"criminal","finance","death penalty"};
 	
 	private static final int MAXSOURCES = 100; // Integer.MAX_VALUE
 //	private List<String> sourceFiles = new ArrayList<String>();
-	private Map<String, ArrayList<String>> sourceFiles = new TreeMap<String, ArrayList<String>>();
+	private Map<String, List<String>> sourceFiles = new TreeMap<String, List<String>>();
 	private Map<String, Long> truths = new TreeMap<String, Long>();
 	
 	public void init() throws IOException {
@@ -71,10 +74,10 @@ public class Sources {
 		}
 		logger.debug("Aggregated truths: {}",truths);
 	}
-	public ArrayList<String> getTruth4File(String fileName) throws IOException {
+	public List<String> getTruth4File(String fileName) throws IOException {
 		String rfn = FilenameUtils.removeExtension(fileName);
 		File truthF = new File(truthPath+File.separatorChar+rfn+TRUTH_EXT);
-		ArrayList<String> truth = new ArrayList<String>();
+		List<String> truth = new ArrayList<String>();
 		if (truthF.isFile()) {
 			String truthJson = FileUtils.readFileToString(truthF);
 			JSONArray ja = (JSONArray)JSONValue.parse(truthJson);
@@ -83,6 +86,8 @@ public class Sources {
 				String key = (String)jo.get("topic");
 				truth.add(key);
 			}
+		} else {
+			truth = Arrays.asList(FAKE_TRUTH);
 		}
 		return truth;
 	}
@@ -121,13 +126,28 @@ public class Sources {
 		}		
 		return ja;
 	}
-	public String getTopicsFor(String file) throws IOException {
-		StringBuilder sb = new StringBuilder();
-		ArrayList<String> truth = getTruth4File(file);
+	@SuppressWarnings("unchecked")
+	public JSONArray getTopicsFor(String file) throws IOException {
+		JSONArray ja = new JSONArray();
+		List<String> truth = getTruth4File(file);
 		for (String t : truth) {
-			sb.append("<li>"+t+"</li>");
+			ja.add(t);
 		}
-		return sb.toString();
+		return ja;
+	}
+
+	@SuppressWarnings("unchecked")
+	public String setTopicsFor(String name, String[] topics) throws IOException {
+		File truthF = new File(truthPath+File.separatorChar+name+"."+TRUTH_EXT);
+		JSONArray ja = new JSONArray();
+		for (String t : topics) {
+			JSONObject jo = new JSONObject();
+			jo.put("topic", t);
+			jo.put("weight", 1);
+			ja.add(jo);
+		}
+		FileUtils.writeStringToFile(truthF, ja.toString());
+		return name+" topics saved.";
 	}
 	public String getDocText(String file) throws IOException {
 		File sourceFile = new File(sourcePath+File.separatorChar+file);
