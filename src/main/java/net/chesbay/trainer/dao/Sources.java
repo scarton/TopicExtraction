@@ -31,6 +31,7 @@ public class Sources {
 	private static final int MAXSOURCES = 100; // Integer.MAX_VALUE
 //	private List<String> sourceFiles = new ArrayList<String>();
 	private Map<String, List<String>> sourceFiles = new TreeMap<String, List<String>>();
+	private String[] sourceFilesArray;
 	private Map<String, Long> truths = new TreeMap<String, Long>();
 	
 	public void init() throws IOException {
@@ -48,6 +49,7 @@ public class Sources {
 				sourceFiles.put(listOfFiles[i].getName(),getTruth4File(listOfFiles[i].getName()));
 			}
 		}
+		sourceFilesArray=sourceFiles.keySet().toArray(new String[0]);
 	}
 
 	public void collectTruth() throws IOException {
@@ -106,7 +108,7 @@ public class Sources {
 	@SuppressWarnings("unchecked")
 	public JSONObject getRandomDoc() throws IOException {
 		int r = (int)(Math.random()*(sourceFiles.size()+1));
-		String randomFile = sourceFiles.keySet().toArray(new String[0])[r];
+		String randomFile = sourceFilesArray[r];
 		JSONObject jo = new JSONObject();
 		jo.put("title", randomFile);
 		jo.put("truth", getTruth4File(randomFile));
@@ -115,13 +117,10 @@ public class Sources {
 	@SuppressWarnings("unchecked")
 	public JSONArray getTopicsForCloud() {
 		JSONArray ja = new JSONArray();
-		JSONObject ca = new JSONObject();
-		ca.put("class","cloud-word");
 		for (String text : truths.keySet()) {
 			JSONObject jo = new JSONObject();
 			jo.put("text", text);
 			jo.put("weight",truths.get(text));
-			jo.put("html", ca);
 			ja.add(jo);
 		}		
 		return ja;
@@ -138,7 +137,7 @@ public class Sources {
 
 	@SuppressWarnings("unchecked")
 	public String setTopicsFor(String name, String[] topics) throws IOException {
-		File truthF = new File(truthPath+File.separatorChar+name+"."+TRUTH_EXT);
+		File truthF = new File(truthPath+File.separatorChar+name+TRUTH_EXT);
 		JSONArray ja = new JSONArray();
 		for (String t : topics) {
 			JSONObject jo = new JSONObject();

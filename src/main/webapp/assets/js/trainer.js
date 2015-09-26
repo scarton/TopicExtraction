@@ -1,3 +1,4 @@
+var unsavedData=false;
 function getRandomDoc(targetTitleID,targetId) {
     $.ajax({
         'url':"getRandomDoc",
@@ -28,19 +29,37 @@ function makeDocBoxScrollBar(targetId) {
 	    verticalHandleClass: 'handle3'
 	});        
 }
-
+function makeCloudArray(data) {
+	var tag_list = new Array();
+	for ( var i = 0; i < data.length; ++i ) 
+	{
+			var x = data[i];
+			tag_list.push({
+					text: x.text,
+					weight: x.weight,
+		            handlers : {click: function() { 
+		                var zz = x;
+		                return function() {
+		                	assignCloudTopic2Doc(zz.text);
+		                }
+		            }()},
+					html: {title: x.weight + " weight"}
+			});
+	}
+	return tag_list;
+}
 function setCloud(cloudID) {
     $.ajax({
         'url':"getTopicsForCloud",
         type:'GET',
         dataType:'json',
         success: function(data){
-            $("#"+cloudID).jQCloud(data);
-            $(".cloud-word").click(function() {
-            	alert("Clicked on "+this.text);
-            });
+            $("#"+cloudID).jQCloud(makeCloudArray(data));
         }
     });    
+}
+function assignCloudTopic2Doc(topic) {
+	$("#topic-list").tagit("createTag", topic);
 }
 function makeTagsForDoc(tagId,file) {
     $.ajax({
@@ -66,6 +85,7 @@ function saveTagsForDoc(file, topics) {
         dataType:'text',
         success: function(data){
         	$.log("saveTagesForDoc returns: "+data);
+        	unsavedData=false;
         },
         error: function(jqXHR,textStatus,errorThrown) {
         	;
@@ -75,13 +95,22 @@ function saveTagsForDoc(file, topics) {
 }
 function setBindings() {
 	$("#next-button").click(function() {
-		getRandomDoc("doc-name","document-content");
+		if (unsavedData) {
+			if (confirm("You have unsaved changes that will be lost. Please click 'Cancel' and then save your changes. Or click 'Okay' to continue and lose your changes")) {
+				getRandomDoc("doc-name","document-content");
+			}
+		} else {
+			getRandomDoc("doc-name","document-content");
+		}
 	});
 	$("#save-button").click(function() {
 		saveTagsForDoc($("#doc-name").text(), $("#topic-list").tagit("assignedTags"));
 		
 	});
 	$("#topic-list").tagit({
-    	allowSpaces : true
+    	allowSpaces : true,
+    	beforeTagAdded : function(event, ui) {
+    		unsavedData=true;
+    	}
 	})
 }
