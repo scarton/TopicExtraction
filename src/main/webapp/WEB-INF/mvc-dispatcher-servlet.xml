@@ -1,8 +1,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:context="http://www.springframework.org/schema/context"
-    xmlns:mvc="http://www.springframework.org/schema/mvc"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
         http://www.springframework.org/schema/mvc
         http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd     
         http://www.springframework.org/schema/beans     
@@ -10,22 +9,32 @@
         http://www.springframework.org/schema/context 
         http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <context:component-scan base-package="net.chesbay.trainer.controllers" />
-    <mvc:annotation-driven/> 
-    <mvc:resources mapping="/assets/**" location="/assets/**"/>
-    <bean
-        class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-        <property name="prefix">
-            <value>/WEB-INF/pages/</value>
-        </property>
-        <property name="suffix">
-            <value>.jsp</value>
-        </property>
-    </bean>
-    <bean id="sources" class="net.chesbay.trainer.dao.Sources" init-method="init">
-        <property name="sourcePath" value="/home/Sharing/SCOTUS"/>
-        <property name="truthPath" value="/home/Sharing/SCOTUS_TRUTH"/>
-    
-    </bean>
+	<context:component-scan base-package="net.chesbay.trainer.controllers" />
+	<mvc:annotation-driven />
+	<mvc:resources mapping="/assets/**" location="/assets/**" />
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>WEB-INF/app.properties</value>
+			</list>
+		</property>
+	</bean>
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix">
+			<value>/WEB-INF/pages/</value>
+		</property>
+		<property name="suffix">
+			<value>.jsp</value>
+		</property>
+	</bean>
+	<bean id="sources" class="net.chesbay.trainer.dao.Sources"
+		init-method="init">
+		<property name="sourcePath" value="${sources}" />
+		<property name="truthPath" value="${truth.target}" />
+        <property name="additive" value="${additive}" />
+        <property name="masterTopics" value="${master.topics}" />
+	</bean>
 
 </beans>

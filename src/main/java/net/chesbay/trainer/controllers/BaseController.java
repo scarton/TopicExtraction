@@ -26,6 +26,7 @@ public class BaseController {
 
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public String welcome(ModelMap model) {
+		model.put("additive", sources.isAdditive());
 		return VIEW_INDEX;
 	}
 

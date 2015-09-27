@@ -17,7 +17,7 @@
     <script>
 	    $(document).ready(function() {
 	    	$.setLogging(true);
-	    	setBindings();
+	    	setBindings(${additive});
 	        getRandomDoc("doc-name","document-content");
 	        makeDocBoxScrollBar("document-content");
 	        setCloud("tag-cloud");
@@ -35,9 +35,9 @@
 				</ul>
 			</div>
 			<h1>
-				Topic Extraction Training
+				COW - Computah Obfuscated Weview...
 			</h1>
-			<h6>Assigning topics to content to train MAUI Models.</h6>
+			<h6>Assigning topics to content to train learning models.</h6>
 			<hr />
 		</div>
 	</div>
@@ -58,6 +58,7 @@
 		<aside class="large-3 columns">
 
 			<h5>Topics for this Document</h5>
+			<div id="additive-message"></div>
 			<ul id="topic-list"></ul>
 
 			<div>
@@ -75,7 +76,7 @@
 			<hr />
 			<div class="row">
 				<div class="large-6 columns">
-					<p>Question or Issues - steve@chesbay.net.</p>
+					<p>Question or Issues - stephen.carton@aitheras.com</p>
 				</div>
 			</div>
 		</div>

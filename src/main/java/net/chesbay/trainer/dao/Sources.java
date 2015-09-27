@@ -23,11 +23,11 @@ public class Sources {
 	final static Logger logger = LoggerFactory.getLogger(Sources.class);
 	private String sourcePath;
 	private String truthPath;
+	private String masterTopics;
+	private boolean additive;
 	private static final String JSON_ELEMENT="html";
 	private static final String TRUTH_EXT=".key";
 	private static final String SOURCE_EXT=".json";
-	private static final String[] FAKE_TRUTH={"criminal","finance","death penalty"};
-	
 	private static final int MAXSOURCES = 100; // Integer.MAX_VALUE
 //	private List<String> sourceFiles = new ArrayList<String>();
 	private Map<String, List<String>> sourceFiles = new TreeMap<String, List<String>>();
@@ -36,7 +36,10 @@ public class Sources {
 	
 	public void init() throws IOException {
 		makeSources();
-		collectTruth();
+		collectTruthTopics(new File(masterTopics)); // collect all topics from the master topics collection
+		if (additive) { //aggregate topics from the specific key files.
+			collectTruth();
+		}
 	}
 	
 	public void makeSources() throws IOException {
@@ -51,28 +54,30 @@ public class Sources {
 		}
 		sourceFilesArray=sourceFiles.keySet().toArray(new String[0]);
 	}
-
+	public void collectTruthTopics(File topicsFile) throws IOException {
+		if (topicsFile.isFile()) {
+			String truthJson = FileUtils.readFileToString(topicsFile);
+			JSONArray ja = (JSONArray)JSONValue.parse(truthJson);
+			logger.debug("Truth file {}: {}",topicsFile.getName(),ja.toString());
+			for (int c=0; c<ja.size(); c++) {
+				JSONObject jo = (JSONObject)ja.get(c);
+				String key = (String)jo.get("topic");
+				long weight = jo.get("weight")!=null?(Long)jo.get("weight"):1;
+				if (truths.containsKey(key)) {
+					truths.put(key, truths.get(key)+weight);
+				} else {
+					truths.put(key, weight);
+				}
+			}
+		}
+	}
 	public void collectTruth() throws IOException {
 		File truthF = new File(truthPath);
 		FileFilter fileFilter = new WildcardFileFilter("*"+TRUTH_EXT);
 		File[] listOfFiles = truthF.listFiles(fileFilter);
 		logger.debug("Number of truth files: {}",listOfFiles.length);
 		for (int i = 0; i<listOfFiles.length; i++) {
-			if (listOfFiles[i].isFile()) {
-				String truthJson = FileUtils.readFileToString(listOfFiles[i]);
-				JSONArray ja = (JSONArray)JSONValue.parse(truthJson);
-				logger.debug("Truth file {}: {}",listOfFiles[i].getName(),ja.toString());
-				for (int c=0; c<ja.size(); c++) {
-					JSONObject jo = (JSONObject)ja.get(c);
-					String key = (String)jo.get("topic");
-					long weight = (Long)jo.get("weight");
-					if (truths.containsKey(key)) {
-						truths.put(key, truths.get(key)+weight);
-					} else {
-						truths.put(key, weight);
-					}
-				}
-			}
+			collectTruthTopics(listOfFiles[i]);
 		}
 		logger.debug("Aggregated truths: {}",truths);
 	}
@@ -88,8 +93,6 @@ public class Sources {
 				String key = (String)jo.get("topic");
 				truth.add(key);
 			}
-		} else {
-			truth = Arrays.asList(FAKE_TRUTH);
 		}
 		return truth;
 	}
@@ -158,5 +161,17 @@ public class Sources {
 	}
 	public void setTruthPath(String truthPath) {
 		this.truthPath = truthPath;
+	}
+
+	public void setMasterTopics(String masterTopics) {
+		this.masterTopics = masterTopics;
+	}
+
+	public void setAdditive(boolean additive) {
+		this.additive = additive;
+	}
+
+	public boolean isAdditive() {
+		return additive;
 	}
 }
