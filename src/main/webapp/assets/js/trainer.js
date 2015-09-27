@@ -143,8 +143,7 @@ function setBindings(additive) {
 	} else {
 		$("#additive-message").text("You cannot create new topics, only select topics from the cloud below.");
 	}
-	
-	
+	unsavedData = false; // any initial topics will cause this to be true, so reset it after they are loaded above.
 }
 String.prototype.hashCode = function() {
 	var hash = 0, i, chr, len;
