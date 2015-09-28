@@ -1,4 +1,4 @@
-package net.chesbay.trainer.search;
+package com.aitheras.trainer.search;
 
 import java.io.File;
 import java.io.IOException;

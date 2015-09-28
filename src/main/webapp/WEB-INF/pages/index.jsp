@@ -31,6 +31,7 @@
 			<div class="nav-bar right">
 				<ul class="button-group">
 					<li><a href="#" id="save-button" class="button">Save</a></li>
+                    <li><a href="#" id="prev-button" class="button">Prev</a></li>
 					<li><a href="#" id="next-button" class="button">Next</a></li>
 				</ul>
 			</div>
@@ -47,10 +48,6 @@
 
 		<div class="large-9 columns" role="content">
             <h3 id="doc-name"></h3>
-            <div style="text-align: right;">
-	            <span title="Previous Document" class="doc-nav nav-left">&#171;</span>
-	            <span title="Next Document" class="doc-nav nav-right">&#187;</span>
-            </div>
 			<article>
 				<div class="doc-box" id="document-content">
 				</div>

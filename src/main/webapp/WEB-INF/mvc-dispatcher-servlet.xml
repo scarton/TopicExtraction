@@ -9,7 +9,7 @@
         http://www.springframework.org/schema/context 
         http://www.springframework.org/schema/context/spring-context.xsd">
 
-	<context:component-scan base-package="net.chesbay.trainer.controllers" />
+	<context:component-scan base-package="com.aitheras.trainer.controllers" />
 	<mvc:annotation-driven />
 	<mvc:resources mapping="/assets/**" location="/assets/**" />
 	<bean id="propertyConfigurer"
@@ -20,7 +20,7 @@
 			</list>
 		</property>
 	</bean>
-	<bean id="search" class="net.chesbay.trainer.search.Search" init-method="init">
+	<bean id="search" class="com.aitheras.trainer.search.Search" init-method="init">
         <property name="indexPath" value="${index.path}" />
 	</bean>
 	<bean
@@ -32,7 +32,7 @@
 			<value>.jsp</value>
 		</property>
 	</bean>
-	<bean id="sources" class="net.chesbay.trainer.dao.Sources" init-method="init">
+	<bean id="sources" class="com.aitheras.trainer.dao.Sources" init-method="init">
 		<property name="sourcePath" value="${data.source}" />
 		<property name="truthPath" value="${truth.target}" />
         <property name="additive" value="${additive}" />

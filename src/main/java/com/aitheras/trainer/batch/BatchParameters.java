@@ -1,4 +1,4 @@
-package net.chesbay.trainer.batch;
+package com.aitheras.trainer.batch;
 
 public class BatchParameters {
 	private String indexPath;

@@ -1,8 +1,6 @@
-package net.chesbay.trainer.controllers;
+package com.aitheras.trainer.controllers;
 
 import java.io.IOException;
-
-import net.chesbay.trainer.dao.Sources;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +11,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.aitheras.trainer.dao.Sources;
 
 @Controller
 public class BaseController {
@@ -28,6 +28,13 @@ public class BaseController {
 	public String welcome(ModelMap model) {
 		model.put("additive", sources.isAdditive());
 		return VIEW_INDEX;
+	}
+
+	@RequestMapping(value = "/getDoc/{id}", method = RequestMethod.GET)
+	@ResponseBody
+	public String getDoc(@PathVariable String id) throws IOException {
+		logger.debug("BaseController - getDoc end point: {}",id);
+		return sources.getDoc(id).toString();
 	}
 
 	@RequestMapping(value = "/getRandomDoc", method = RequestMethod.GET)

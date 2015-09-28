@@ -1,4 +1,4 @@
-package net.chesbay.trainer.dao;
+package com.aitheras.trainer.dao;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -25,7 +25,7 @@ public class Sources {
 	private String masterTopics;
 	private boolean additive;
 	private static final String JSON_ELEMENT="html";
-	private static final String TRUTH_EXT=".key";
+	private static final String TRUTH_EXT=".truth";
 	private static final String SOURCE_EXT=".json";
 	private static final int MAXSOURCES = 100; // Integer.MAX_VALUE
 //	private List<String> sourceFiles = new ArrayList<String>();
@@ -35,7 +35,11 @@ public class Sources {
 	
 	public void init() throws IOException {
 		makeSources();
-		collectTruthTopics(new File(masterTopics)); // collect all topics from the master topics collection
+//		buildCloudTopics();
+	}
+	
+	public void buildCloudTopics() throws IOException {
+		collectMasterTruthTopics(new File(masterTopics)); // collect all topics from the master topics collection
 		if (additive) { //aggregate topics from the specific key files.
 			collectTruth();
 		}
@@ -53,7 +57,7 @@ public class Sources {
 		}
 		sourceFilesArray=sourceFiles.keySet().toArray(new String[0]);
 	}
-	public void collectTruthTopics(File topicsFile) throws IOException {
+	public void collectMasterTruthTopics(File topicsFile) throws IOException {
 		if (topicsFile.isFile()) {
 			String truthJson = FileUtils.readFileToString(topicsFile);
 			JSONArray ja = (JSONArray)JSONValue.parse(truthJson);
@@ -76,7 +80,7 @@ public class Sources {
 		File[] listOfFiles = truthF.listFiles(fileFilter);
 		logger.debug("Number of truth files: {}",listOfFiles.length);
 		for (int i = 0; i<listOfFiles.length; i++) {
-			collectTruthTopics(listOfFiles[i]);
+			collectMasterTruthTopics(listOfFiles[i]);
 		}
 		logger.debug("Aggregated truths: {}",truths);
 	}
@@ -117,7 +121,16 @@ public class Sources {
 		return jo;
 	}
 	@SuppressWarnings("unchecked")
-	public JSONArray getTopicsForCloud() {
+	public JSONObject getDoc(String id) throws IOException {
+		String file = id+SOURCE_EXT;
+		JSONObject jo = new JSONObject();
+		jo.put("title", file);
+		jo.put("truth", getTruth4File(file));
+		return jo;
+	}
+	@SuppressWarnings("unchecked")
+	public JSONArray getTopicsForCloud() throws IOException {
+		buildCloudTopics();
 		JSONArray ja = new JSONArray();
 		for (String text : truths.keySet()) {
 			JSONObject jo = new JSONObject();

@@ -1,8 +1,26 @@
 var unsavedData = false;
-var cloudTopics = new Array();;
+var cloudTopics = new Array();
+var visited = new Array();
+
 function getRandomDoc(targetTitleID, targetId) {
 	$.ajax({
 		'url' : "getRandomDoc",
+		type : 'GET',
+		dataType : 'json',
+		success : function(data) {
+			$("#" + targetTitleID).html(data.title);
+			visited.push(data.title);
+			getDocText(targetId, data.title);
+			makeTagsForDoc("topic-list", data.title)
+			$("#" + targetId).scrollTop(0);
+//			$("#" + targetId).enscroll('resize');
+		}
+	});
+}
+function getPrevDoc(targetTitleID, targetId) {
+	var id=visited.pop();
+	$.ajax({
+		'url' : "getDoc/+id,
 		type : 'GET',
 		dataType : 'json',
 		success : function(data) {
@@ -101,20 +119,29 @@ function saveTagsForDoc(file, topics) {
 			;
 		}
 	});
-
 }
 function setBindings(additive) {
 	$.log("setting bindings, new topics can be created? " + additive);
+	$("#prev-button").click(
+			function() {
+				if (unsavedData) {
+					if (confirm("You have unsaved changes that will be lost. Please click 'Cancel' and then save your changes. Or click 'Okay' to continue and lose your changes")) {
+						getPrevDoc("doc-name", "document-content");
+					}
+				} else {
+					getPrevDoc("doc-name", "document-content");
+				}
+			});
 	$("#next-button").click(
-		function() {
-			if (unsavedData) {
-				if (confirm("You have unsaved changes that will be lost. Please click 'Cancel' and then save your changes. Or click 'Okay' to continue and lose your changes")) {
+			function() {
+				if (unsavedData) {
+					if (confirm("You have unsaved changes that will be lost. Please click 'Cancel' and then save your changes. Or click 'Okay' to continue and lose your changes")) {
+						getRandomDoc("doc-name", "document-content");
+					}
+				} else {
 					getRandomDoc("doc-name", "document-content");
 				}
-			} else {
-				getRandomDoc("doc-name", "document-content");
-			}
-		});
+			});
 	$("#save-button").click(
 		function() {
 			saveTagsForDoc($("#doc-name").text(), $("#topic-list").tagit(
