@@ -47,12 +47,14 @@
 
 		<div class="large-9 columns" role="content">
             <h3 id="doc-name"></h3>
+            <div style="text-align: right;">
+	            <span title="Previous Document" class="doc-nav nav-left">&#171;</span>
+	            <span title="Next Document" class="doc-nav nav-right">&#187;</span>
+            </div>
 			<article>
 				<div class="doc-box" id="document-content">
 				</div>
-
 			</article>
-
 		</div>
 
 		<aside class="large-3 columns">

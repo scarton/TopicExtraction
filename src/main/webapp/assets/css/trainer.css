@@ -9,6 +9,9 @@
 	width: 350px; 
 	height: 350px;
 }
+.doc-nav {
+	font-size: 3em;
+}
 .track3 {
     width: 10px;
     background: rgba(0, 0, 0, 0);

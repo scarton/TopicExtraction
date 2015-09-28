@@ -20,8 +20,8 @@
 			</list>
 		</property>
 	</bean>
-	<bean id="search" class="net.chesbay.dao.Search" init-method="init">
-        <property name="indexPath" value="${index.Path}" />
+	<bean id="search" class="net.chesbay.trainer.search.Search" init-method="init">
+        <property name="indexPath" value="${index.path}" />
 	</bean>
 	<bean
 		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
@@ -38,5 +38,4 @@
         <property name="additive" value="${additive}" />
         <property name="masterTopics" value="${master.topics}" />
 	</bean>
-
 </beans>

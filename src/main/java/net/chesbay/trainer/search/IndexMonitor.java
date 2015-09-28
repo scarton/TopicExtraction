@@ -1,4 +1,4 @@
-package net.chesbay.search;
+package net.chesbay.trainer.search;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,14 +17,12 @@ import org.apache.lucene.store.NIOFSDirectory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class IndexMonitor extends IndexQueue {
+public class IndexMonitor extends Thread {
 	private final static Logger logger = LoggerFactory.getLogger(IndexMonitor.class);
 
-	private Index indexer;
+	private Indexer indexer;
 	private int refreshInterval;
 	private Directory indexStore;
-
-	private String luceneIndexPath; // injected
 
 	private final BlockingQueue<String> requestQueue = new LinkedBlockingQueue<String>();
 	private volatile boolean shutdown;
@@ -44,27 +42,15 @@ public class IndexMonitor extends IndexQueue {
 		this.shutdown = false;
 	}
 
-	/**
-	 * releaseIndexLock
-	 * 
-	 * Delete the Lucene "write.lock" file in the index directory.
-	 * 
-	 */
-	public void releaseIndexLock() {
-		File lockFile = new File(luceneIndexPath + "/write.lock");
-		try {
-			if (lockFile.exists()) {
-				if (lockFile.delete()) {
-					logger.error("releaseIndexLock: Index Lock file deleted.");
-				}
-				else {
-					logger.error("releaseIndexLock: Found Index Lock file, but could not delete");
-				}
-			}
+	public void requestIndexing(String ... requestIDs)  {
+		if (requestIDs == null) {
+			logger.error("request must not be null");
+			throw new IllegalArgumentException("request must not be null");
 		}
-		catch (Exception e) {
-			logger.error("releaseIndexLock: Error trying to delete Lucene index lock.");
-		}
+				for (String requestID : requestIDs) {
+					// logger.debug("Adding from list to queue: " + requestID);
+				}
+		prod();
 	}
 
 	/**
@@ -74,33 +60,13 @@ public class IndexMonitor extends IndexQueue {
 	 * </p>
 	 */
 	public void init() {
-		// VERBOSE */ logger.debug("Initializing index monitor...");
-		try {
-			if (indexer.need2Reindex()) { // if we need to reindex, pull all the topic IDs and place in the queue
-				logger.debug("Resources need re-indexing, setting up request.");
-				List<String> ids = dataUtil.getAllResourceIDs();
-				logger.debug("Placing "+ids.size()+" resource id's into the queue.");
-				// queue up all ids as if they are new so the indexer will not attempt to unindex any of them.
-				requestNewIndexing(backgroundUserGuid, ids, "N", IndexQueue.Type.low);
-			}
-			else {
-				// logger.debug("No resources need re-indexing, optimize.");
-				indexer.optimize();
-			}
-			this.setPriority(Thread.MIN_PRIORITY+2);
-			this.start();
-			// VERBOSE */ logger.debug("Initializing IndexMonitor timed refresh with refreshInterval = " + refreshInterval);
-			Timer timer = new Timer();
-			IMTimerTask indexTask = new IMTimerTask();
-			timer.scheduleAtFixedRate(indexTask, new Date(), 1000 * 60 * refreshInterval);
-			// prod(); // in case there are residual requests on the queue... Now handled on a schedule.
-		}
-		catch (IndexException e) {
-			releaseIndexLock();
-			logger.error("Index Monitor could not start.");
-			logger.error(e.getMessage());
-			// logger.debug(StringH.StackTrace(e));
-		}
+		this.setPriority(Thread.MIN_PRIORITY+2);
+		this.start();
+		// VERBOSE */ logger.debug("Initializing IndexMonitor timed refresh with refreshInterval = " + refreshInterval);
+		Timer timer = new Timer();
+		IMTimerTask indexTask = new IMTimerTask();
+		timer.scheduleAtFixedRate(indexTask, new Date(), 1000 * 60 * refreshInterval);
+		// prod(); // in case there are residual requests on the queue... Now handled on a schedule.
 	}
 
 	/**
@@ -141,13 +107,8 @@ public class IndexMonitor extends IndexQueue {
 			catch (InterruptedException e) { // Ignore
 				logger.warn("Indexer interrupted");
 			}
-			catch (IndexException e) {
-				releaseIndexLock();
-				logger.error("IndexException: " + e.getMessage());
-				// logger.debug(StringH.StackTrace(e));
-			}
 			catch (Exception e) {
-				releaseIndexLock();
+//				releaseIndexLock();
 				logger.error("General Exception: " + e.getMessage());
 				logger.debug(ExceptionUtils.getStackTrace(e));
 			}
@@ -156,7 +117,7 @@ public class IndexMonitor extends IndexQueue {
 	}
 
 	private List<Map<String, String>> getNextIndexIds() {
-		return (List<Map<String, String>>) jdbcTemplate.queryForList(SQLP.get("IndexMonitor.psGETNEXTINDEXIDS"));
+		return null;
 	}
 
 	/**
@@ -197,7 +158,7 @@ public class IndexMonitor extends IndexQueue {
 		this.requestQueue.add("IndexingToDo");// this is simply to let the indexer start -- the actual IDs are in the DB
 	}
 
-	public void setIndexer(Index indexer) {
+	public void setIndexer(Indexer indexer) {
 		this.indexer = indexer;
 	}
 

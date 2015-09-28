@@ -1,4 +1,4 @@
-package net.chesbay.search;
+package net.chesbay.trainer.search;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,8 +11,8 @@ import org.apache.lucene.store.NIOFSDirectory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Index {
-	private final static Logger logger = LoggerFactory.getLogger(Index.class);
+public class Indexer {
+	private final static Logger logger = LoggerFactory.getLogger(Indexer.class);
 	private String indexPath;
 	private Directory indexStore;
 
