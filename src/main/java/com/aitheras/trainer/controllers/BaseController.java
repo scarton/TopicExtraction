@@ -44,25 +44,25 @@ public class BaseController {
 		return sources.getRandomDoc().toString();
 	}
 
-	@RequestMapping(value = "/getDocText/{name}.{type}", method = RequestMethod.GET)
+	@RequestMapping(value = "/getDocText/{id}", method = RequestMethod.GET)
 	@ResponseBody
-	public String getDocText(@PathVariable String name, @PathVariable String type) throws IOException {
-		logger.debug("BaseController - getDocText end point, {}.{}",name,type);
-		return sources.getDocText(name+"."+type);
+	public String getDocText(@PathVariable String id) throws IOException {
+		logger.debug("BaseController - getDocText end point, {}.{}",id);
+		return sources.getDocText(id);
 	}
 
-	@RequestMapping(value = "/getTopicsFor/{name}.{type}", method = RequestMethod.GET)
+	@RequestMapping(value = "/getTopicsFor/{id}", method = RequestMethod.GET)
 	@ResponseBody
-	public String getTopicsFor(@PathVariable String name, @PathVariable String type) throws IOException {
-		logger.debug("BaseController - getTopicsFor end point, {}.{}",name,type);
-		return sources.getTopicsFor(name+"."+type).toString();
+	public String getTopicsFor(@PathVariable String id) throws IOException {
+		logger.debug("BaseController - getTopicsFor end point, {}.{}",id);
+		return sources.getTopicsFor(id).toString();
 	}
 
-	@RequestMapping(value = "/setTopicsFor/{name}", method = RequestMethod.GET)
+	@RequestMapping(value = "/setTopicsFor/{id}", method = RequestMethod.GET)
 	@ResponseBody
-	public String setTopicsFor(@PathVariable String name, String[] topics) throws IOException {
-		logger.debug("BaseController - getTopicsFor end point, {} - {}",name,topics);
-		return sources.setTopicsFor(name,topics).toString();
+	public String setTopicsFor(@PathVariable String id, String[] topics) throws IOException {
+		logger.debug("BaseController - getTopicsFor end point, {} - {}",id,topics);
+		return sources.setTopicsFor(id,topics).toString();
 	}
 
 	@RequestMapping(value = "/getTopicsForCloud", method = RequestMethod.GET)

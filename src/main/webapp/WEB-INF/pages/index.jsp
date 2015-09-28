@@ -34,6 +34,7 @@
                     <li><a href="#" id="prev-button" class="button">Prev</a></li>
 					<li><a href="#" id="next-button" class="button">Next</a></li>
 				</ul>
+				<div class="flash"></div>
 			</div>
 			<h1>
 				COW - Computah Obfuscated Weview...

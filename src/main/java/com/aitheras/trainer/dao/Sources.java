@@ -18,6 +18,13 @@ import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
+/**
+ * Provides data for the GUI - random or searched doc text.
+ * @TODO refactor sources to use an interface to a specific data service.
+ * @author Steve Carton, stephen.carton@aitheras.com
+ *
+ */
 public class Sources {
 	final static Logger logger = LoggerFactory.getLogger(Sources.class);
 	private String sourcePath;
@@ -52,7 +59,7 @@ public class Sources {
 
 		for (int i = 0; i < Math.min(MAXSOURCES, listOfFiles.length); i++) {
 			if (listOfFiles[i].isFile()) {
-				sourceFiles.put(listOfFiles[i].getName(),getTruth4File(listOfFiles[i].getName()));
+				sourceFiles.put(FilenameUtils.removeExtension(listOfFiles[i].getName()),getTruth4File(listOfFiles[i].getName()));
 			}
 		}
 		sourceFilesArray=sourceFiles.keySet().toArray(new String[0]);
@@ -113,19 +120,18 @@ public class Sources {
 	}
 	@SuppressWarnings("unchecked")
 	public JSONObject getRandomDoc() throws IOException {
-		int r = (int)(Math.random()*(sourceFiles.size()+1));
-		String randomFile = sourceFilesArray[r];
+		int r = (int)(Math.random()*sourceFiles.size());
+		String randomId = sourceFilesArray[r];
 		JSONObject jo = new JSONObject();
-		jo.put("title", randomFile);
-		jo.put("truth", getTruth4File(randomFile));
+		jo.put("title", randomId);
+		jo.put("truth", getTruth4File(randomId));
 		return jo;
 	}
 	@SuppressWarnings("unchecked")
 	public JSONObject getDoc(String id) throws IOException {
-		String file = id+SOURCE_EXT;
 		JSONObject jo = new JSONObject();
-		jo.put("title", file);
-		jo.put("truth", getTruth4File(file));
+		jo.put("title", id);
+		jo.put("truth", getTruth4File(id));
 		return jo;
 	}
 	@SuppressWarnings("unchecked")
@@ -141,9 +147,9 @@ public class Sources {
 		return ja;
 	}
 	@SuppressWarnings("unchecked")
-	public JSONArray getTopicsFor(String file) throws IOException {
+	public JSONArray getTopicsFor(String id) throws IOException {
 		JSONArray ja = new JSONArray();
-		List<String> truth = getTruth4File(file);
+		List<String> truth = getTruth4File(id);
 		for (String t : truth) {
 			ja.add(t);
 		}
@@ -151,8 +157,8 @@ public class Sources {
 	}
 
 	@SuppressWarnings("unchecked")
-	public String setTopicsFor(String name, String[] topics) throws IOException {
-		File truthF = new File(truthPath+File.separatorChar+name+TRUTH_EXT);
+	public String setTopicsFor(String id, String[] topics) throws IOException {
+		File truthF = new File(truthPath+File.separatorChar+id+TRUTH_EXT);
 		JSONArray ja = new JSONArray();
 		for (String t : topics) {
 			JSONObject jo = new JSONObject();
@@ -161,10 +167,10 @@ public class Sources {
 			ja.add(jo);
 		}
 		FileUtils.writeStringToFile(truthF, ja.toString());
-		return name+" topics saved.";
+		return id+" topics saved.";
 	}
-	public String getDocText(String file) throws IOException {
-		File sourceFile = new File(sourcePath+File.separatorChar+file);
+	public String getDocText(String id) throws IOException {
+		File sourceFile = new File(sourcePath+File.separatorChar+id+SOURCE_EXT);
 		String json = FileUtils.readFileToString(sourceFile);
 		return getTextWithMarkup(json);
 	}

@@ -13,24 +13,28 @@ function getRandomDoc(targetTitleID, targetId) {
 			getDocText(targetId, data.title);
 			makeTagsForDoc("topic-list", data.title)
 			$("#" + targetId).scrollTop(0);
-//			$("#" + targetId).enscroll('resize');
 		}
 	});
 }
 function getPrevDoc(targetTitleID, targetId) {
-	var id=visited.pop();
-	$.ajax({
-		'url' : "getDoc/+id,
-		type : 'GET',
-		dataType : 'json',
-		success : function(data) {
-			$("#" + targetTitleID).html(data.title);
-			getDocText(targetId, data.title);
-			makeTagsForDoc("topic-list", data.title)
-			$("#" + targetId).scrollTop(0);
-//			$("#" + targetId).enscroll('resize');
-		}
-	});
+	if (visited.length>1) {
+		visited.pop(); // top item is always the current ID, so pop back off.
+		var id=visited.last();
+		("Returning to "+id).flash();
+		$.ajax({
+			'url' : "getDoc/"+id,
+			type : 'GET',
+			dataType : 'json',
+			success : function(data) {
+				$("#" + targetTitleID).html(data.title);
+				getDocText(targetId, data.title);
+				makeTagsForDoc("topic-list", data.title)
+				$("#" + targetId).scrollTop(0);
+			}
+		});
+	} else {
+		("No 'previous' document.").flash();
+	}
 }
 function getDocText(targetId, file) {
 	$.ajax({
@@ -39,7 +43,6 @@ function getDocText(targetId, file) {
 		dataType : 'html',
 		success : function(data) {
 			$("#" + targetId).html(data);
-			// makeDocBoxScrollBar(targetId);
 		}
 	});
 }
@@ -99,6 +102,7 @@ function makeTagsForDoc(tagId, file) {
 				$.log('setting tag: ' + data[i]);
 				$("#" + tagId).tagit("createTag", data[i]);
 			}
+			unsavedData=false; // these tags are already saved, so clear the unsaved flag, which was set by adding them.
 		},
 		error : function(jqXHR, textStatus, errorThrown) {
 			;
@@ -116,7 +120,7 @@ function saveTagsForDoc(file, topics) {
 			unsavedData = false;
 		},
 		error : function(jqXHR, textStatus, errorThrown) {
-			;
+			("Error saving tags: "+errorThrown).flash();
 		}
 	});
 }
@@ -170,7 +174,6 @@ function setBindings(additive) {
 	} else {
 		$("#additive-message").text("You cannot create new topics, only select topics from the cloud below.");
 	}
-	unsavedData = false; // any initial topics will cause this to be true, so reset it after they are loaded above.
 }
 String.prototype.hashCode = function() {
 	var hash = 0, i, chr, len;
@@ -182,4 +185,13 @@ String.prototype.hashCode = function() {
 		hash |= 0; // Convert to 32bit integer
 	}
 	return hash;
+};
+String.prototype.flash = function(){
+	$(".flash").html(this).fadeIn("fast");
+	setTimeout(function(){
+		$(".flash").fadeOut("slow");
+	}, 3500);
+}
+Array.prototype.last = function(){
+    return this[this.length - 1];
 };

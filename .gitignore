@@ -17,7 +17,7 @@ atlassian-ide-plugin.xml
 /log/*
 /tmp
 .DS_Store
-
+*.prefs
 *.class
 *~
 *.bak
