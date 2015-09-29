@@ -61,8 +61,10 @@ public class BaseController {
 	@RequestMapping(value = "/setTopicsFor/{id}", method = RequestMethod.GET)
 	@ResponseBody
 	public String setTopicsFor(@PathVariable String id, String[] topics) throws IOException {
-		logger.debug("BaseController - getTopicsFor end point, {} - {}",id,topics);
-		return sources.setTopicsFor(id,topics).toString();
+		logger.debug("BaseController - setTopicsFor end point, {} - {}",id,topics);
+		String res = sources.setTopicsFor(id,topics).toString();
+		sources.updateTruth(topics);
+		return res;
 	}
 
 	@RequestMapping(value = "/getTopicsForCloud", method = RequestMethod.GET)

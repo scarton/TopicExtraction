@@ -1,13 +1,16 @@
 .doc-box {
     overflow: auto;
-    height: 750px;
-    width: 850px !important;
+    height: 600px;
+    width: 750px !important;
     padding: 0 5px;
     border: 1px solid #b7b7b7;
 }
 .cloud {
 	width: 350px; 
 	height: 350px;
+}
+ul.tagit li.tagit-choice {
+    font-size: .7em;
 }
 .flash {
 	color: #CC6600;

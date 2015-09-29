@@ -58,7 +58,7 @@ function makeCloudArray(data) {
 	for (var i = 0; i < data.length; ++i) {
 		var x = data[i];
 		var h = x.text.hashCode();
-		$.log(x.text+" = "+h);
+		//$.log(x.text+" = "+h);
 		cloudTopics[h] = x.text; // collect these topics for use in other functions.
 		tag_list.push({
 			text : x.text,
@@ -84,7 +84,7 @@ function setCloud(cloudID) {
 		type : 'GET',
 		dataType : 'json',
 		success : function(data) {
-			$("#" + cloudID).jQCloud(makeCloudArray(data));
+			$("#" + cloudID).jQCloud("update",makeCloudArray(data));
 		}
 	});
 }
@@ -116,40 +116,41 @@ function saveTagsForDoc(file, topics) {
 		type : 'GET',
 		dataType : 'text',
 		success : function(data) {
-			$.log("saveTagesForDoc returns: " + data);
+			$.log("saveTagsForDoc returns: " + data);
 			unsavedData = false;
+			setCloud("tag-cloud");
+			"Topics Saved.".flash();
 		},
 		error : function(jqXHR, textStatus, errorThrown) {
 			("Error saving tags: "+errorThrown).flash();
 		}
 	});
 }
+function prevDoc() {
+	if (unsavedData) {
+		if (confirm("You have unsaved changes that will be lost. Please click 'Cancel' and then save your changes. Or click 'Okay' to continue and lose your changes")) {
+			getPrevDoc("doc-name", "document-content");
+		}
+	} else {
+		getPrevDoc("doc-name", "document-content");
+	}
+}
+function nextDoc() {
+	if (unsavedData) {
+		if (confirm("You have unsaved changes that will be lost. Please click 'Cancel' and then save your changes. Or click 'Okay' to continue and lose your changes")) {
+			getRandomDoc("doc-name", "document-content");
+		}
+	} else {
+		getRandomDoc("doc-name", "document-content");
+	}
+}
 function setBindings(additive) {
 	$.log("setting bindings, new topics can be created? " + additive);
-	$("#prev-button").click(
-			function() {
-				if (unsavedData) {
-					if (confirm("You have unsaved changes that will be lost. Please click 'Cancel' and then save your changes. Or click 'Okay' to continue and lose your changes")) {
-						getPrevDoc("doc-name", "document-content");
-					}
-				} else {
-					getPrevDoc("doc-name", "document-content");
-				}
-			});
-	$("#next-button").click(
-			function() {
-				if (unsavedData) {
-					if (confirm("You have unsaved changes that will be lost. Please click 'Cancel' and then save your changes. Or click 'Okay' to continue and lose your changes")) {
-						getRandomDoc("doc-name", "document-content");
-					}
-				} else {
-					getRandomDoc("doc-name", "document-content");
-				}
-			});
+	$("#prev-button").click(function(){prevDoc();});
+	$("#next-button").click(function(){nextDoc();});
 	$("#save-button").click(
 		function() {
-			saveTagsForDoc($("#doc-name").text(), $("#topic-list").tagit(
-					"assignedTags"));
+			saveTagsForDoc($("#doc-name").text(), $("#topic-list").tagit("assignedTags"));
 
 		});
 	$("#topic-list").tagit({
@@ -174,6 +175,33 @@ function setBindings(additive) {
 	} else {
 		$("#additive-message").text("You cannot create new topics, only select topics from the cloud below.");
 	}
+	$(window).bind('keydown', function(event) {
+	    if (event.ctrlKey || event.metaKey) {
+	        switch (String.fromCharCode(event.which).toLowerCase()) {
+	        case 's':
+	            event.preventDefault();
+				saveTagsForDoc($("#doc-name").text(), $("#topic-list").tagit("assignedTags"));
+	            break;
+	        }
+	    } else {
+	        switch (event.which) {
+	        case 39: // right
+	            event.preventDefault();
+	            nextDoc();
+	            break;
+	        case 37: // left
+	            event.preventDefault();
+	            prevDoc();
+	            break;
+	    	case 38: // up
+	            event.preventDefault();
+	            break;
+            case 40: // down
+	            event.preventDefault();
+	            break;
+	        }
+	    }
+	});
 }
 String.prototype.hashCode = function() {
 	var hash = 0, i, chr, len;

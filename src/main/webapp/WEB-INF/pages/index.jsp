@@ -20,6 +20,7 @@
 	    	setBindings(${additive});
 	        getRandomDoc("doc-name","document-content");
 	        makeDocBoxScrollBar("document-content");
+	        $("#tag-cloud").jQCloud();
 	        setCloud("tag-cloud");
 	    });
     </script>
@@ -37,7 +38,7 @@
 				<div class="flash"></div>
 			</div>
 			<h1>
-				COW - Computah Obfuscated Weview...
+				Topic Trainer...
 			</h1>
 			<h6>Assigning topics to content to train learning models.</h6>
 			<hr />

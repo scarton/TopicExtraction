@@ -10,7 +10,7 @@
         </layout>
     </appender>
 
-    <logger name="net.chesbay" level="debug" additivity="false">
+    <logger name="com.aitheras" level="debug" additivity="false">
         <appender-ref ref="FILE" />
     </logger>
 

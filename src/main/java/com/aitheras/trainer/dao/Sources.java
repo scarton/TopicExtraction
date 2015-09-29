@@ -42,14 +42,7 @@ public class Sources {
 	
 	public void init() throws IOException {
 		makeSources();
-//		buildCloudTopics();
-	}
-	
-	public void buildCloudTopics() throws IOException {
-		collectMasterTruthTopics(new File(masterTopics)); // collect all topics from the master topics collection
-		if (additive) { //aggregate topics from the specific key files.
-			collectTruth();
-		}
+		buildCloudTopics();
 	}
 	
 	public void makeSources() throws IOException {
@@ -64,7 +57,13 @@ public class Sources {
 		}
 		sourceFilesArray=sourceFiles.keySet().toArray(new String[0]);
 	}
-	public void collectMasterTruthTopics(File topicsFile) throws IOException {
+	public void buildCloudTopics() throws IOException {
+		collectTruthTopicsFromFile(new File(masterTopics)); // collect all topics from the master topics collection
+		if (additive) { //aggregate topics from the specific key files.
+			collectTruth();
+		}
+	}
+	public void collectTruthTopicsFromFile(File topicsFile) throws IOException {
 		if (topicsFile.isFile()) {
 			String truthJson = FileUtils.readFileToString(topicsFile);
 			JSONArray ja = (JSONArray)JSONValue.parse(truthJson);
@@ -87,9 +86,32 @@ public class Sources {
 		File[] listOfFiles = truthF.listFiles(fileFilter);
 		logger.debug("Number of truth files: {}",listOfFiles.length);
 		for (int i = 0; i<listOfFiles.length; i++) {
-			collectMasterTruthTopics(listOfFiles[i]);
+			collectTruthTopicsFromFile(listOfFiles[i]);
 		}
 		logger.debug("Aggregated truths: {}",truths);
+	}
+	public void updateTruth(String[] topics) {
+		long weight = 1;
+		for (String key : topics) {
+			if (truths.containsKey(key)) {
+				logger.debug("Updating weight in cloud topic {}",key);
+				truths.put(key, truths.get(key)+weight);
+			} else {
+				logger.debug("Adding cloud topic {}",key);
+				truths.put(key, weight);
+			}
+		}
+	}
+	@SuppressWarnings("unchecked")
+	public JSONArray getTopicsForCloud() throws IOException {
+		JSONArray ja = new JSONArray();
+		for (String text : truths.keySet()) {
+			JSONObject jo = new JSONObject();
+			jo.put("text", text);
+			jo.put("weight",truths.get(text));
+			ja.add(jo);
+		}		
+		return ja;
 	}
 	public List<String> getTruth4File(String fileName) throws IOException {
 		String rfn = FilenameUtils.removeExtension(fileName);
@@ -105,6 +127,28 @@ public class Sources {
 			}
 		}
 		return truth;
+	}
+	@SuppressWarnings("unchecked")
+	public JSONArray getTopicsFor(String id) throws IOException {
+		JSONArray ja = new JSONArray();
+		List<String> truth = getTruth4File(id);
+		for (String t : truth) {
+			ja.add(t);
+		}
+		return ja;
+	}
+	@SuppressWarnings("unchecked")
+	public String setTopicsFor(String id, String[] topics) throws IOException {
+		File truthF = new File(truthPath+File.separatorChar+id+TRUTH_EXT);
+		JSONArray ja = new JSONArray();
+		for (String t : topics) {
+			JSONObject jo = new JSONObject();
+			jo.put("topic", t);
+			jo.put("weight", 1);
+			ja.add(jo);
+		}
+		FileUtils.writeStringToFile(truthF, ja.toString());
+		return id+" topics saved.";
 	}
 	public String getTextWithMarkup(String jdoc) {
 		JSONObject jo = (JSONObject)JSONValue.parse(jdoc);
@@ -133,41 +177,6 @@ public class Sources {
 		jo.put("title", id);
 		jo.put("truth", getTruth4File(id));
 		return jo;
-	}
-	@SuppressWarnings("unchecked")
-	public JSONArray getTopicsForCloud() throws IOException {
-		buildCloudTopics();
-		JSONArray ja = new JSONArray();
-		for (String text : truths.keySet()) {
-			JSONObject jo = new JSONObject();
-			jo.put("text", text);
-			jo.put("weight",truths.get(text));
-			ja.add(jo);
-		}		
-		return ja;
-	}
-	@SuppressWarnings("unchecked")
-	public JSONArray getTopicsFor(String id) throws IOException {
-		JSONArray ja = new JSONArray();
-		List<String> truth = getTruth4File(id);
-		for (String t : truth) {
-			ja.add(t);
-		}
-		return ja;
-	}
-
-	@SuppressWarnings("unchecked")
-	public String setTopicsFor(String id, String[] topics) throws IOException {
-		File truthF = new File(truthPath+File.separatorChar+id+TRUTH_EXT);
-		JSONArray ja = new JSONArray();
-		for (String t : topics) {
-			JSONObject jo = new JSONObject();
-			jo.put("topic", t);
-			jo.put("weight", 1);
-			ja.add(jo);
-		}
-		FileUtils.writeStringToFile(truthF, ja.toString());
-		return id+" topics saved.";
 	}
 	public String getDocText(String id) throws IOException {
 		File sourceFile = new File(sourcePath+File.separatorChar+id+SOURCE_EXT);
