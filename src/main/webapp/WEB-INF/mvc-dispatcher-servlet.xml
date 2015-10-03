@@ -32,10 +32,15 @@
 			<value>.jsp</value>
 		</property>
 	</bean>
-	<bean id="sources" class="com.aitheras.trainer.dao.Sources" init-method="init">
-		<property name="sourcePath" value="${data.source}" />
-		<property name="truthPath" value="${truth.target}" />
+    <bean id="source" class="com.aitheras.trainer.dao.JSONFileSource" init-method="init">
+        <property name="sourcePath" value="${data.source}" />
+    </bean>
+    <bean id="topics" class="com.aitheras.trainer.dao.JSONFileTopics" init-method="init">
+        <property name="truthPath" value="${truth.target}" />
         <property name="additive" value="${additive}" />
         <property name="masterTopics" value="${master.topics}" />
-	</bean>
+    </bean>
+    <bean id="truth" class="com.aitheras.trainer.dao.JSONFileTruth">
+        <property name="truthPath" value="${truth.target}" />
+    </bean>
 </beans>

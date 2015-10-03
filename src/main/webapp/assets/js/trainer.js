@@ -93,7 +93,7 @@ function assignCloudTopic2Doc(topic) {
 }
 function makeTagsForDoc(tagId, file) {
 	$.ajax({
-		'url' : "getTopicsFor/" + file,
+		'url' : "getTruthFor/" + file,
 		type : 'GET',
 		dataType : 'json',
 		success : function(data) {
@@ -112,7 +112,7 @@ function makeTagsForDoc(tagId, file) {
 }
 function saveTagsForDoc(file, topics) {
 	$.ajax({
-		'url' : "setTopicsFor/" + file + "?topics=" + topics,
+		'url' : "setTruthFor/" + file + "?topics=" + topics,
 		type : 'GET',
 		dataType : 'text',
 		success : function(data) {
@@ -184,22 +184,22 @@ function setBindings(additive) {
 	            break;
 	        }
 	    } else {
-	        switch (event.which) {
-	        case 39: // right
-	            event.preventDefault();
-	            nextDoc();
-	            break;
-	        case 37: // left
-	            event.preventDefault();
-	            prevDoc();
-	            break;
-	    	case 38: // up
-	            event.preventDefault();
-	            break;
-            case 40: // down
-	            event.preventDefault();
-	            break;
-	        }
+//	        switch (event.which) {
+//	        case 39: // right
+//	            event.preventDefault();
+//	            nextDoc();
+//	            break;
+//	        case 37: // left
+//	            event.preventDefault();
+//	            prevDoc();
+//	            break;
+//	    	case 38: // up
+//	            event.preventDefault();
+//	            break;
+//            case 40: // down
+//	            event.preventDefault();
+//	            break;
+//	        }
 	    }
 	});
 }

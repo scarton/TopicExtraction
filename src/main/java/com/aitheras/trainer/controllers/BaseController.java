@@ -2,6 +2,7 @@ package com.aitheras.trainer.controllers;
 
 import java.io.IOException;
 
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.aitheras.trainer.dao.Sources;
+import com.aitheras.trainer.dao.DocumentSource;
+import com.aitheras.trainer.dao.TopicSource;
+import com.aitheras.trainer.dao.TruthSource;
 
 @Controller
 public class BaseController {
@@ -20,50 +23,66 @@ public class BaseController {
 	private final static Logger logger = LoggerFactory.getLogger(BaseController.class);
 	
 	@Autowired
-	private Sources sources;
+	private DocumentSource source;
+	
+	@Autowired
+	private TruthSource truth;
+
+	@Autowired
+	private TopicSource topics;
 
 	private static final String VIEW_INDEX = "index";
 
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public String welcome(ModelMap model) {
-		model.put("additive", sources.isAdditive());
+		model.put("additive", topics.isAdditive());
 		return VIEW_INDEX;
 	}
 
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getDoc/{id}", method = RequestMethod.GET)
 	@ResponseBody
 	public String getDoc(@PathVariable String id) throws IOException {
 		logger.debug("BaseController - getDoc end point: {}",id);
-		return sources.getDoc(id).toString();
+		JSONObject jo = new JSONObject();
+		jo.put("title", id);
+		jo.put("truth", truth.getTruthFor(id));
+		return jo.toString();
 	}
 
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getRandomDoc", method = RequestMethod.GET)
 	@ResponseBody
 	public String getRandomDoc() throws IOException {
 		logger.debug("BaseController - getRandomDoc end point");
-		return sources.getRandomDoc().toString();
+		String randomId = source.getRandomId();
+		JSONObject jo = new JSONObject();
+		jo.put("title", randomId);
+		jo.put("truth", truth.getTruthFor(randomId));
+		return jo.toString();
 	}
 
 	@RequestMapping(value = "/getDocText/{id}", method = RequestMethod.GET)
 	@ResponseBody
 	public String getDocText(@PathVariable String id) throws IOException {
-		logger.debug("BaseController - getDocText end point, {}.{}",id);
-		return sources.getDocText(id);
+		logger.debug("BaseController - getDocText end point, {}.",id);
+		return source.getDocText(id);
 	}
 
-	@RequestMapping(value = "/getTopicsFor/{id}", method = RequestMethod.GET)
+	@RequestMapping(value = "/getTruthFor/{id}", method = RequestMethod.GET)
 	@ResponseBody
-	public String getTopicsFor(@PathVariable String id) throws IOException {
-		logger.debug("BaseController - getTopicsFor end point, {}.{}",id);
-		return sources.getTopicsFor(id).toString();
+	public String getTruthFor(@PathVariable String id) throws IOException {
+		logger.debug("BaseController - getTruthFor end point, {}.",id);
+		return truth.getTruthFor(id).toString();
 	}
 
-	@RequestMapping(value = "/setTopicsFor/{id}", method = RequestMethod.GET)
+	@RequestMapping(value = "/setTruthFor/{id}", method = RequestMethod.GET)
 	@ResponseBody
-	public String setTopicsFor(@PathVariable String id, String[] topics) throws IOException {
-		logger.debug("BaseController - setTopicsFor end point, {} - {}",id,topics);
-		String res = sources.setTopicsFor(id,topics).toString();
-		sources.updateTruth(topics);
+	public String setTruthFor(@PathVariable String id, String[] topics) throws IOException {
+		logger.debug("BaseController - setTruthFor end point, {} - {}",id,topics);
+		String res = truth.setTruthFor(id,topics).toString();
+		if (this.topics.isAdditive())
+			this.topics.updateTopicsWithTruth(topics);
 		return res;
 	}
 
@@ -71,10 +90,10 @@ public class BaseController {
 	@ResponseBody
 	public String getTopicsForCloud() throws IOException {
 		logger.debug("BaseController - getTopicsForCloud end point.");
-		return sources.getTopicsForCloud().toString();
+		return topics.getTopicsForCloud().toString();
 	}
 
-	public void setSources(Sources sources) {
-		this.sources = sources;
+	public void setSource(DocumentSource source) {
+		this.source = source;
 	}
 }
