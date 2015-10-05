@@ -13,6 +13,7 @@ div.jqcloud {
 
 div.jqcloud span {
   padding: 0;
+  cursor: pointer;
 }
 
 /* fonts */

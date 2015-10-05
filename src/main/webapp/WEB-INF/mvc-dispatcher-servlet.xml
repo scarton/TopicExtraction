@@ -32,8 +32,11 @@
 			<value>.jsp</value>
 		</property>
 	</bean>
-    <bean id="source" class="com.aitheras.trainer.dao.JSONFileSource" init-method="init">
+    <!-- bean id="source" class="com.aitheras.trainer.dao.JSONFileSource" init-method="init">
         <property name="sourcePath" value="${data.source}" />
+    </bean -->
+    <bean id="source" class="com.aitheras.trainer.dao.LuceneSource" init-method="init">
+        <property name="indexPath" value="${index.path}" />
     </bean>
     <bean id="topics" class="com.aitheras.trainer.dao.JSONFileTopics" init-method="init">
         <property name="truthPath" value="${truth.target}" />

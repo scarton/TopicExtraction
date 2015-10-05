@@ -2,6 +2,10 @@
 <configuration>
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
         <file>/home/logs/trainer.log </file>
+    <!-- 
+        <file>/home/logs/trainer.log </file>
+        <file>/home/logs/loader.log </file>
+     -->
         <append>false</append>
         <layout class="ch.qos.logback.classic.PatternLayout">
         <Pattern>
