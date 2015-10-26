@@ -36,23 +36,6 @@ function getPrevDoc(targetTitleID, targetId) {
 		("No 'previous' document.").flash();
 	}
 }
-function getDocText(targetId, file) {
-	$.ajax({
-		'url' : "getDocText/" + file,
-		type : 'GET',
-		dataType : 'html',
-		success : function(data) {
-			$("#" + targetId).html(data);
-		}
-	});
-}
-function makeDocBoxScrollBar(targetId) {
-	$("#" + targetId).enscroll({
-		showOnHover : true,
-		verticalTrackClass : 'track3',
-		verticalHandleClass : 'handle3'
-	});
-}
 function makeCloudArray(data) {
 	var tag_list = new Array();
 	for (var i = 0; i < data.length; ++i) {
@@ -144,24 +127,16 @@ function nextDoc() {
 		getRandomDoc("doc-name", "document-content");
 	}
 }
-function setBindings(additive) {
-	$.log("setting bindings, new topics can be created? " + additive);
-	$("#prev-button").click(function(){prevDoc();});
-	$("#next-button").click(function(){nextDoc();});
-	$("#save-button").click(
-		function() {
-			saveTagsForDoc($("#doc-name").text(), $("#topic-list").tagit("assignedTags"));
-
-		});
+function setupTopicList(additive) {
 	$("#topic-list").tagit({
 		allowSpaces : true,
 		preprocessTag : function(val) {
-			var tl = val.toLowerCase();
+			var tl = val;
 			$.log("Adding tag: " + tl);
 			return tl;
 		},
 		afterTagAdded : function(event, ui) {
-			var tl = ui.tagLabel.toLowerCase();
+			var tl = ui.tagLabel;
 			if (additive || cloudTopics[ui.tagLabel.hashCode()]==tl) {
 				$.log("Added tag: " + tl);
 				unsavedData = true;
@@ -170,11 +145,22 @@ function setBindings(additive) {
 			}
 		}
 	});
-	if (additive) {
+}
+function setBindings(binary, additive) {
+	$.log("setting bindings, new topics can be created? " + additive);
+	$("#prev-button").click(function(){prevDoc();});
+	$("#next-button").click(function(){nextDoc();});
+	$("#save-button").click(
+		function() {
+			saveTagsForDoc($("#doc-name").text(), $("#topic-list").tagit("assignedTags"));
+			nextDoc();
+		});
+	if (!binary && additive) {
 		$("#additive-message").text("You can create original topics or select from the cloud below.");
 	} else {
 		$("#additive-message").text("You cannot create new topics, only select topics from the cloud below.");
 	}
+	
 	$(window).bind('keydown', function(event) {
 	    if (event.ctrlKey || event.metaKey) {
 	        switch (String.fromCharCode(event.which).toLowerCase()) {

@@ -10,6 +10,7 @@ import java.io.IOException;
 public interface DocumentSource {
 
 	public void init() throws IOException;
+	public long maxDocs() throws IOException;
 	public String getDocText(String id) throws IOException;
 	public String getCleanDocText(String id) throws IOException;
 	public String getRandomId() throws IOException;

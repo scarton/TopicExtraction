@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  */
 public class JSONFileSource implements DocumentSource {
 	final static Logger logger = LoggerFactory.getLogger(JSONFileSource.class);
-	private String sourcePath;
+	private Setup setup;
 	private static final String JSON_ELEMENT="html";
 	private static final String SOURCE_EXT=".json";
 	private static final int MAXSOURCES = 100; // Integer.MAX_VALUE
@@ -34,7 +34,7 @@ public class JSONFileSource implements DocumentSource {
 	}
 	
 	public void makeSources() throws IOException {
-		File srcF = new File(sourcePath);
+		File srcF = new File(setup.getDataSource());
 		FileFilter fileFilter = new WildcardFileFilter("*"+SOURCE_EXT);
 		File[] listOfFiles = srcF.listFiles(fileFilter);
 
@@ -62,20 +62,25 @@ public class JSONFileSource implements DocumentSource {
 		return randomId;
 	}
 	public String getDocText(String id) throws IOException {
-		File sourceFile = new File(sourcePath+File.separatorChar+id+SOURCE_EXT);
+		File sourceFile = new File(setup.getDataSource()+File.separatorChar+id+SOURCE_EXT);
 		String json = FileUtils.readFileToString(sourceFile);
 		return getTextWithMarkup(json);
 	}
 	public String getCleanDocText(String id) throws IOException {
-		File sourceFile = new File(sourcePath+File.separatorChar+id+SOURCE_EXT);
+		File sourceFile = new File(setup.getDataSource()+File.separatorChar+id+SOURCE_EXT);
 		String json = FileUtils.readFileToString(sourceFile);
 		return getTextWithoutMarkup(json);
 	}
-	public void setSourcePath(String sourcePath) {
-		this.sourcePath = sourcePath;
+	public void setSetup(Setup setup) {
+		this.setup = setup;
 	}
 
 	@Override
 	public void close() throws IOException {
+	}
+
+	@Override
+	public long maxDocs() throws IOException {
+		return sourceFiles.size();
 	}
 }

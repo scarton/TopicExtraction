@@ -4,20 +4,16 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Random;
 
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
-import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.NIOFSDirectory;
 import org.slf4j.Logger;
@@ -32,6 +28,7 @@ import org.slf4j.LoggerFactory;
  */
 public class LuceneSource implements DocumentSource {
 	final static Logger logger = LoggerFactory.getLogger(LuceneSource.class);
+	private Setup setup;
 	private Directory indexStore;
 	IndexReader indexReader;
 	public String getRandomId() throws IOException {
@@ -66,8 +63,9 @@ public class LuceneSource implements DocumentSource {
 	    reader.close();
 	    return d;
 	}
-	public void setIndexPath(String indexPath) throws IOException {
-		indexStore = new NIOFSDirectory(Paths.get(indexPath));
+	public void setSetup(Setup setup) throws IOException {
+		this.setup=setup;
+		indexStore = new NIOFSDirectory(Paths.get(setup.getIndexPath()));
 	}
 	@Override
 	public void init() throws IOException {
@@ -76,5 +74,9 @@ public class LuceneSource implements DocumentSource {
 	@Override
 	public void close() throws IOException {
 		indexReader.close();
+	}
+	@Override
+	public long maxDocs() throws IOException {
+		return indexReader.maxDoc();
 	}
 }

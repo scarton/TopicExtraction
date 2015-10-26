@@ -21,21 +21,22 @@ import org.apache.lucene.store.NIOFSDirectory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Search {
-	private final static Logger logger = LoggerFactory.getLogger(Search.class);
-	private String indexPath;
+import com.aitheras.trainer.dao.Setup;
+
+public class LuceneSearch {
+	private final static Logger logger = LoggerFactory.getLogger(LuceneSearch.class);
+	Setup setup;
 	private Directory indexStore;
 	
-	
 	public void init() throws IOException {
-		File indexF = new File(indexPath);
+		File indexF = new File(setup.getIndexPath());
 		if (!indexF.exists()) {
 			FileUtils.forceMkdir(indexF);
 		}
 		if (!indexF.exists() || !indexF.isDirectory()) {
 			throw new IOException("indexPath must be a directory with appropriate permissions.");
 		}
-		indexStore = new NIOFSDirectory(Paths.get(indexPath));
+		indexStore = new NIOFSDirectory(Paths.get(setup.getIndexPath()));
 	}
 
 	public void query(String qstr) throws ParseException, IOException {
@@ -59,7 +60,8 @@ public class Search {
 	    // is no need to access the documents any more.
 	    reader.close();
 	}
-	public void setIndexPath(String indexPath) {
-		this.indexPath = indexPath;
+
+	public void setSetup(Setup setup) {
+		this.setup = setup;
 	}
 }

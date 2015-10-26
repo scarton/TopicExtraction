@@ -6,6 +6,5 @@ import org.json.simple.JSONArray;
 
 public interface TopicSource {
 	public JSONArray getTopicsForCloud() throws IOException;
-	public void updateTopicsWithTruth(String[] topics);
-	public boolean isAdditive();
+	public void updateTopicsWithTruth(String... topics);
 }

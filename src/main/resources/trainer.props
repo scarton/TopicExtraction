@@ -1,0 +1,20 @@
+# Project-specific properties 
+# which should be in trainer.props (in the classpath) 
+# or a file named in -Dtrainer.props=xxx 
+
+
+name=Enron Collection          
+title=Personal Documents Model Training
+solrUrl=http://localhost:8983/solr/enron
+#index.path=/home/data/scotus/indexes
+#index.path=/home/data/ENRON/indexes
+#master.topics=/home/Sharing/ENRON/truth/master-topics.json
+#master.topics=/home/Sharing/SCOTUS_truth/master-topics.json
+#master.topics=/home/Sharing/ENRON/truth/binary-master-topics.json
+affirmativeMessage=Personal
+negativeMessage=Work
+truthPath=/home/Sharing/ENRON/truth
+data.source=/home/Sharing/SCOTUS
+stopwordsFile=stopwords_en.txt
+binaryMode=true
+additive=false    

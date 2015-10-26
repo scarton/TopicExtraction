@@ -20,30 +20,32 @@
 			</list>
 		</property>
 	</bean>
-	<bean id="search" class="com.aitheras.trainer.search.Search" init-method="init">
-        <property name="indexPath" value="${index.path}" />
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix">
+            <value>/WEB-INF/pages/</value>
+        </property>
+        <property name="suffix">
+            <value>.jsp</value>
+        </property>
+    </bean>
+	
+	<bean id="search" class="com.aitheras.trainer.search.SolrSearch" init-method="init">
+	   <property name="setup" ref="setup"/>
 	</bean>
-	<bean
-		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-		<property name="prefix">
-			<value>/WEB-INF/pages/</value>
-		</property>
-		<property name="suffix">
-			<value>.jsp</value>
-		</property>
-	</bean>
-    <!-- bean id="source" class="com.aitheras.trainer.dao.JSONFileSource" init-method="init">
-        <property name="sourcePath" value="${data.source}" />
+    <bean id="setup" class="com.aitheras.trainer.dao.Setup" init-method="init"/>
+    <!-- bean id="source" class="com.aitheras.trainer.dao.LuceneSource" init-method="init">
+           <property name="setup" ref="setup"/>
     </bean -->
-    <bean id="source" class="com.aitheras.trainer.dao.LuceneSource" init-method="init">
-        <property name="indexPath" value="${index.path}" />
+    <!-- bean id="source" class="com.aitheras.trainer.dao.JSONFileSource" init-method="init">
+       <property name="setup" ref="setup"/>
+    </bean -->
+    <bean id="source" class="com.aitheras.trainer.dao.SolrSource" init-method="init">
+       <property name="setup" ref="setup"/>
     </bean>
     <bean id="topics" class="com.aitheras.trainer.dao.JSONFileTopics" init-method="init">
-        <property name="truthPath" value="${truth.target}" />
-        <property name="additive" value="${additive}" />
-        <property name="masterTopics" value="${master.topics}" />
+       <property name="setup" ref="setup"/>
     </bean>
     <bean id="truth" class="com.aitheras.trainer.dao.JSONFileTruth">
-        <property name="truthPath" value="${truth.target}" />
+       <property name="setup" ref="setup"/>
     </bean>
 </beans>

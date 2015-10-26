@@ -16,23 +16,23 @@ import org.slf4j.LoggerFactory;
 
 public class JSONFileTopics implements TopicSource{
 	final static Logger logger = LoggerFactory.getLogger(JSONFileTopics.class);
-	private String truthPath;
-	private boolean additive;
-	private String masterTopics;
+	private Setup setup;
 	private static final String TRUTH_EXT=".truth";
 	private Map<String, Long> topics = new TreeMap<String, Long>();
+	
 	public void init() throws IOException {
-		buildCloudTopics();
+		if (!setup.isBinaryMode())
+			buildCloudTopics();
 	}
 	
 	private void buildCloudTopics() throws IOException {
-		collectTruthTopics4Id(masterTopics); // collect all topics from the master topics collection
-		if (additive) { //aggregate topics from the specific key files.
+		collectTruthTopics4Id(setup.getMasterTopicsFile()); // collect all topics from the master topics collection
+		if (setup.isAdditive()) { //aggregate topics from the specific key files.
 			collectTruthTopics();
 		}
 	}
 	private void collectTruthTopics() throws IOException {
-		File truthF = new File(truthPath);
+		File truthF = new File(setup.getTruthPath());
 		FileFilter fileFilter = new WildcardFileFilter("*"+TRUTH_EXT);
 		File[] listOfFiles = truthF.listFiles(fileFilter);
 		logger.debug("Number of truth files: {}",listOfFiles.length);
@@ -60,7 +60,7 @@ public class JSONFileTopics implements TopicSource{
 		}
 	}
 	public void updateTopicsWithTruth(String[] topics) {
-		if (this.additive) {
+		if (setup.isAdditive()) {
 			long weight = 1;
 			for (String key : topics) {
 				if (this.topics.containsKey(key)) {
@@ -84,16 +84,7 @@ public class JSONFileTopics implements TopicSource{
 		}		
 		return ja;
 	}
-	public void setMasterTopics(String masterTopics) {
-		this.masterTopics = masterTopics;
-	}
-	public void setAdditive(boolean additive) {
-		this.additive = additive;
-	}
-	public boolean isAdditive() {
-		return additive;
-	}
-	public void setTruthPath(String truthPath) {
-		this.truthPath = truthPath;
+	public void setSetup(Setup setup) {
+		this.setup = setup;
 	}
 }

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.aitheras.trainer.dao.DocumentSource;
+import com.aitheras.trainer.dao.Setup;
 import com.aitheras.trainer.dao.TopicSource;
 import com.aitheras.trainer.dao.TruthSource;
 
@@ -21,6 +22,9 @@ import com.aitheras.trainer.dao.TruthSource;
 public class BaseController {
 
 	private final static Logger logger = LoggerFactory.getLogger(BaseController.class);
+	
+	@Autowired
+	private Setup setup;
 	
 	@Autowired
 	private DocumentSource source;
@@ -31,12 +35,20 @@ public class BaseController {
 	@Autowired
 	private TopicSource topics;
 
-	private static final String VIEW_INDEX = "index";
-
 	@RequestMapping(value = "/", method = RequestMethod.GET)
-	public String welcome(ModelMap model) {
-		model.put("additive", topics.isAdditive());
-		return VIEW_INDEX;
+	public String index(ModelMap model) {
+		logger.debug("BaseController - main end point, Binary? {}",setup.isBinaryMode());
+		model.put("name", setup.getName());
+		model.put("title", setup.getTitle());
+		model.put("additive", setup.isAdditive());
+		model.put("binary", setup.isBinaryMode());
+		if (setup.isBinaryMode()) {
+			model.put("affirmativeMessage",setup.getAffirmativeMessage());
+			model.put("negativeMessage", setup.getNegativeMessage());
+			return "binary";
+		} else {
+			return "topical";
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -76,13 +88,30 @@ public class BaseController {
 		return truth.getTruthFor(id).toString();
 	}
 
+	@RequestMapping(value = "/getTagFor/{id}", method = RequestMethod.GET)
+	@ResponseBody
+	public String getTagFor(@PathVariable String id) throws IOException {
+		logger.debug("BaseController - getTruthFor end point, {}.",id);
+		return truth.getTagFor(id).toString();
+	}
+
 	@RequestMapping(value = "/setTruthFor/{id}", method = RequestMethod.GET)
 	@ResponseBody
 	public String setTruthFor(@PathVariable String id, String[] topics) throws IOException {
 		logger.debug("BaseController - setTruthFor end point, {} - {}",id,topics);
 		String res = truth.setTruthFor(id,topics).toString();
-		if (this.topics.isAdditive())
+		if (this.setup.isAdditive())
 			this.topics.updateTopicsWithTruth(topics);
+		return res;
+	}
+
+	@RequestMapping(value = "/setTagFor/{id}", method = RequestMethod.GET)
+	@ResponseBody
+	public String setTagFor(@PathVariable String id, String tag, String reason) throws IOException {
+		logger.debug("BaseController - setTagFor end point, {} - {} {}",id,tag, reason);
+		String res = truth.setTagFor(id,tag,reason).toString();
+		if (this.setup.isAdditive())
+			this.topics.updateTopicsWithTruth(tag);
 		return res;
 	}
 
