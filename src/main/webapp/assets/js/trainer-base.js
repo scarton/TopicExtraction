@@ -1,5 +1,6 @@
 var unsavedData = false;
 var visited = new Array();
+var currentGuid;
 
 function getDocText(targetId, file) {
 	$.ajax({

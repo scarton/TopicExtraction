@@ -1,6 +1,4 @@
-var unsavedData = false;
 var cloudTopics = new Array();
-var visited = new Array();
 
 function getRandomDoc(targetTitleID, targetId) {
 	$.ajax({

@@ -57,8 +57,8 @@ public class BaseController {
 	public String getDoc(@PathVariable String id) throws IOException {
 		logger.debug("BaseController - getDoc end point: {}",id);
 		JSONObject jo = new JSONObject();
-		jo.put("title", id);
-		jo.put("truth", truth.getTruthFor(id));
+		jo.put("title", source.getDocTitle(id));
+		jo.put("guid", id);
 		return jo.toString();
 	}
 
@@ -69,8 +69,9 @@ public class BaseController {
 		logger.debug("BaseController - getRandomDoc end point");
 		String randomId = source.getRandomId();
 		JSONObject jo = new JSONObject();
-		jo.put("title", randomId);
-		jo.put("truth", truth.getTruthFor(randomId));
+		jo.put("guid", randomId);
+		jo.put("title", source.getDocTitle(randomId));
+//		jo.put("truth", truth.getTruthFor(randomId));
 		return jo.toString();
 	}
 

@@ -79,4 +79,8 @@ public class LuceneSource implements DocumentSource {
 	public long maxDocs() throws IOException {
 		return indexReader.maxDoc();
 	}
+	@Override
+	public String getDocTitle(String id) throws IOException {
+		return id;
+	}
 }

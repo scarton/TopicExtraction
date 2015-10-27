@@ -4,10 +4,11 @@ function getRandomDoc(targetTitleID, targetId) {
 		type : 'GET',
 		dataType : 'json',
 		success : function(data) {
+			currentGuid=data.guid;
 			$("#" + targetTitleID).html(data.title);
-			visited.push(data.title);
-			getDocText(targetId, data.title);
-			setTagForDoc(data.title);
+			visited.push(data.guid);
+			getDocText(targetId, data.guid);
+			getTagForDoc(data.guid);
 			$("#" + targetId).scrollTop(0);
 		}
 	});
@@ -23,8 +24,9 @@ function getPrevDoc(targetTitleID, targetId) {
 			dataType : 'json',
 			success : function(data) {
 				$("#" + targetTitleID).html(data.title);
-				getDocText(targetId, data.title);
-				setTagForDoc(data);
+				getDocText(targetId, data.guid);
+				getTagForDoc(data.guid);
+				currentGuid=data.guid;
 				$("#" + targetId).scrollTop(0);
 			}
 		});
@@ -32,14 +34,16 @@ function getPrevDoc(targetTitleID, targetId) {
 		("No 'previous' document.").flash();
 	}
 }
-function setTagForDoc(id) {
+function getTagForDoc(id) {
 	$.ajax({
 		'url' : "getTagFor/" + id,
 		type : 'GET',
 		dataType : 'json',
 		success : function(data) { 
-			$('#'+data.topic).prop('checked',true);
-			$("#reason").val(data.reason);
+			if (data.length>0) {
+				$('#'+data[0].tag).prop('checked',true);
+				$("#reason").val(data[0].reason);
+			}
 			unsavedData=false; // these tags are already saved, so clear the unsaved flag, which was set by adding them.
 		},
 		error : function(jqXHR, textStatus, errorThrown) {
@@ -48,9 +52,9 @@ function setTagForDoc(id) {
 	});
 	unsavedData = false;
 }
-function saveTagForDoc(file, procon, reason) {
+function saveTagForDoc(id, procon, reason) {
 	$.ajax({
-		'url' : "setTagFor/" + file + "?tag=" + procon + "&reason=" + reason,
+		'url' : "setTagFor/" + id + "?tag=" + procon + "&reason=" + reason,
 		type : 'GET',
 		dataType : 'text',
 		success : function(data) {
@@ -70,7 +74,7 @@ function clear() {
 }
 function setBinaryBindings() {
 	$("#save-button").click(function() {
-		saveTagForDoc($("#doc-name").text(), $('input[name="tag"]:checked').val(), $("#reason").val());
+		saveTagForDoc(currentGuid, $('input[name="tag"]:checked').val(), $("#reason").val());
 		clear();
 	});
 	$("#clear-button").click(function() {

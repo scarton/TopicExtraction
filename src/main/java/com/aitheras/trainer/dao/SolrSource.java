@@ -9,6 +9,7 @@ import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +35,22 @@ public class SolrSource implements DocumentSource {
 		} catch (SolrServerException e) {
 			throw new IOException(e.getMessage());
 		}	
+	}
+	public String getDocTitle(String guid) throws IOException {
+		SolrQuery query = new SolrQuery("guid:"+guid);
+		logger.debug("getting doc title for {}",guid);
+		query.setStart(0);
+		query.setRows(1);
+		
+		QueryResponse response;
+		try {
+			response = solr.query(query);
+		} catch (SolrServerException e) {
+			throw new IOException(e.getMessage());
+		}
+		SolrDocumentList results = response.getResults();
+		SolrDocument d = results.get(0);
+		return (String)d.getFieldValue("docid");
 	}
 	public String getRandomId() throws IOException {
 		int docNo = (int)(new Random().nextDouble() * maxDocs());

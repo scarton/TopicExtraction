@@ -61,6 +61,10 @@ public class JSONFileSource implements DocumentSource {
 		String randomId = sourceFiles.get(r);
 		return randomId;
 	}
+	@Override
+	public String getDocTitle(String id) throws IOException {
+		return id;
+	}
 	public String getDocText(String id) throws IOException {
 		File sourceFile = new File(setup.getDataSource()+File.separatorChar+id+SOURCE_EXT);
 		String json = FileUtils.readFileToString(sourceFile);
