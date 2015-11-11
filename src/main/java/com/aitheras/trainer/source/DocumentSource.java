@@ -1,6 +1,8 @@
-package com.aitheras.trainer.dao;
+package com.aitheras.trainer.source;
 
 import java.io.IOException;
+
+import com.aitheras.trainer.dao.Setup;
 
 /**
  * General contract for getting document information from a source of data.
@@ -9,7 +11,7 @@ import java.io.IOException;
  */
 public interface DocumentSource {
 
-	public void init() throws IOException;
+	public void init(Setup setup) throws IOException;
 	public long maxDocs() throws IOException;
 	public String getDocText(String id) throws IOException;
 	public String getDocTitle(String id) throws IOException;

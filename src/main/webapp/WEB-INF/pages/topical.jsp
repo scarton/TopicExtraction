@@ -1,7 +1,7 @@
 <html>
 <head>
+    <link rel="icon" type="image/gif" href="assets/img/bookfavicon.png">
 	<link rel="stylesheet" href="assets/css/foundation.css">
-    <link rel="stylesheet" href="assets/css/trainer.css">
     <link rel="stylesheet" href="assets/css/trainer.css">
     <link rel="stylesheet" href="assets/css/jqcloud.css">
 	<link rel="stylesheet" href="assets/css/vendor/jquery-ui.min.css">
@@ -18,6 +18,7 @@
     <script>
 	    $(document).ready(function() {
 	    	$.setLogging(true);
+            setProject('${project}');
             setBindings();
             setTopicalBindings(${additive});
             setupTopicList(${additive});
@@ -33,12 +34,12 @@
 	<div class="row fullWidth">
 		<div class="large-12 columns">
 			<div class="nav-bar right">
-				<ul class="button-group">
-					<li><a href="#" id="save-button" class="button">Save</a></li>
-                    <li><a href="#" id="prev-button" class="button">Prev</a></li>
-					<li><a href="#" id="next-button" class="button">Next</a></li>
-				</ul>
-				<div class="flash"></div>
+                <ul class="button-group">
+                    <li><a href="#" id="prev-button" class="button small">Prev</a></li>
+                    <li><a href="#" id="next-button" class="button small">Next</a></li>
+                </ul>
+                <div class=""><a href="${root}">Return to Projects List</a></div>
+                <div class="flash"></div>
 			</div>
 			<h1>
 				${name}
@@ -64,7 +65,8 @@
 			<h5>Topics for this Document</h5>
 			<div id="additive-message"></div>
 			<ul id="topic-list"></ul>
-
+            <a href="#" id="save-button" class="button small">Save/Next</a>
+            <a href="#" id="clear-button" class="button small">Clear</a>
 			<div>
 				<h5>Topic Cloud for all Documents</h5>
 				<div id="tag-cloud" class="cloud"></div>
@@ -74,16 +76,6 @@
 
 
 	</div>
-
-	<footer class="row fullWidth">
-		<div class="large-12 columns">
-			<hr />
-			<div class="row">
-				<div class="large-6 columns">
-					<p>Question or Issues - stephen.carton@aitheras.com</p>
-				</div>
-			</div>
-		</div>
-	</footer>
+    <%@ include file="/WEB-INF/pages/footer.jsp" %>
 </body>
 </html>

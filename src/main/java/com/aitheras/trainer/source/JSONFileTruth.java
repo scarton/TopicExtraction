@@ -1,4 +1,4 @@
-package com.aitheras.trainer.dao;
+package com.aitheras.trainer.source;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,11 +13,17 @@ import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.aitheras.trainer.dao.Setup;
+import com.aitheras.trainer.util.Util;
+
 public class JSONFileTruth implements TruthSource {
 	final static Logger logger = LoggerFactory.getLogger(JSONFileTruth.class);
 	private Setup setup;
 	private static final String TRUTH_EXT=".truth";
 
+	public void init(Setup setup) {
+		this.setup=setup;
+	}
 	private List<String> getTruthTopics4Id(String id) throws IOException {
 		String rfn = FilenameUtils.removeExtension(id);
 		File truthF = new File(setup.getTruthPath()+File.separatorChar+rfn+TRUTH_EXT);
@@ -33,13 +39,19 @@ public class JSONFileTruth implements TruthSource {
 		}
 		return truth;
 	}
-	private JSONArray getTruthTag4Id(String id) throws IOException {
+	private JSONArray getTruthTag4Id(String id) {
 		String rfn = FilenameUtils.removeExtension(id);
 		File truthF = new File(setup.getTruthPath()+File.separatorChar+rfn+TRUTH_EXT);
 		JSONArray ja = new JSONArray();
 		if (truthF.isFile()) {
-			String truthJson = FileUtils.readFileToString(truthF);
-			ja = (JSONArray)JSONValue.parse(truthJson);
+			String truthJson;
+			try {
+				truthJson = FileUtils.readFileToString(truthF);
+				ja = (JSONArray)JSONValue.parse(truthJson);
+			} catch (IOException e) {
+				logger.error(e.getMessage());
+				logger.debug(Util.stackTrace(e));
+			}
 		}
 		return ja;
 	}
@@ -79,8 +91,5 @@ public class JSONFileTruth implements TruthSource {
 		ja.add(jo);
 		FileUtils.writeStringToFile(truthF, ja.toString());
 		return id+" tag/reason saved.";
-	}
-	public void setSetup(Setup setup) {
-		this.setup = setup;
 	}
 }

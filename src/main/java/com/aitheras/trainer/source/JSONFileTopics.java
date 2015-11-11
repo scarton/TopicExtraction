@@ -1,4 +1,4 @@
-package com.aitheras.trainer.dao;
+package com.aitheras.trainer.source;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -14,15 +14,24 @@ import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.aitheras.trainer.dao.Setup;
+import com.aitheras.trainer.util.Util;
+
 public class JSONFileTopics implements TopicSource{
 	final static Logger logger = LoggerFactory.getLogger(JSONFileTopics.class);
 	private Setup setup;
 	private static final String TRUTH_EXT=".truth";
 	private Map<String, Long> topics = new TreeMap<String, Long>();
 	
-	public void init() throws IOException {
+	public void init(Setup setup) {
+		this.setup=setup;
 		if (!setup.isBinaryMode())
-			buildCloudTopics();
+			try {
+				buildCloudTopics();
+			} catch (IOException e) {
+				logger.error(e.getMessage());
+				logger.debug(Util.stackTrace(e));
+			}
 	}
 	
 	private void buildCloudTopics() throws IOException {
@@ -59,7 +68,7 @@ public class JSONFileTopics implements TopicSource{
 			}
 		}
 	}
-	public void updateTopicsWithTruth(String[] topics) {
+	public void updateTopicsWithTruth(String... topics) {
 		if (setup.isAdditive()) {
 			long weight = 1;
 			for (String key : topics) {
@@ -83,8 +92,5 @@ public class JSONFileTopics implements TopicSource{
 			ja.add(jo);
 		}		
 		return ja;
-	}
-	public void setSetup(Setup setup) {
-		this.setup = setup;
 	}
 }

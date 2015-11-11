@@ -1,4 +1,4 @@
-package com.aitheras.trainer.dao;
+package com.aitheras.trainer.source;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -13,6 +13,8 @@ import org.json.simple.JSONValue;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.aitheras.trainer.dao.Setup;
 
 
 /**
@@ -29,7 +31,8 @@ public class JSONFileSource implements DocumentSource {
 	private static final int MAXSOURCES = 100; // Integer.MAX_VALUE
 	private ArrayList<String> sourceFiles=new ArrayList<String>();
 	
-	public void init() throws IOException {
+	public void init(Setup setup) throws IOException {
+		this.setup=setup;
 		makeSources();
 	}
 	

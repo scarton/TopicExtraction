@@ -2,6 +2,8 @@ package com.aitheras.trainer.controllers;
 
 import java.io.IOException;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,10 +15,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.aitheras.trainer.dao.DocumentSource;
+import com.aitheras.trainer.dao.ProjectFactory;
 import com.aitheras.trainer.dao.Setup;
-import com.aitheras.trainer.dao.TopicSource;
-import com.aitheras.trainer.dao.TruthSource;
+import com.aitheras.trainer.source.DocumentSource;
+import com.aitheras.trainer.source.TopicSource;
+import com.aitheras.trainer.source.TruthSource;
 
 @Controller
 public class BaseController {
@@ -24,24 +27,44 @@ public class BaseController {
 	private final static Logger logger = LoggerFactory.getLogger(BaseController.class);
 	
 	@Autowired
-	private Setup setup;
-	
-	@Autowired
-	private DocumentSource source;
-	
-	@Autowired
-	private TruthSource truth;
+	private ProjectFactory projectFactory;
 
-	@Autowired
+	private DocumentSource source;
+	private TruthSource truth;
 	private TopicSource topics;
 
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public String index(ModelMap model) {
-		logger.debug("BaseController - main end point, Binary? {}",setup.isBinaryMode());
+		logger.debug("BaseController - workspace selection end point");
+		return "index";
+	}
+
+	@RequestMapping(value = "/getWorkspaces", method = RequestMethod.GET)
+	@ResponseBody
+	public String getWorkspaces(ModelMap model) {
+		logger.debug("BaseController - get workspaces end point");
+		return projectFactory.getWorkspaceList();
+	}
+
+	private Setup getSetup(String project) {
+		Setup setup = projectFactory.getSetup(project);
+		this.source = setup.getDocumentSource();
+		this.truth = setup.getTruthSource();
+		this.topics = setup.getTopicSource();
+		return setup;
+	}
+
+	@RequestMapping(value = "/{project}", method = RequestMethod.GET)
+	public String load(@PathVariable String project, ModelMap model, HttpServletRequest request) {
+		logger.debug("BaseController - main end point, WS: {}",project);
+		Setup setup = getSetup(project);
+		logger.debug("Binary? {}",setup.isBinaryMode());
+		model.put("project", project);
 		model.put("name", setup.getName());
 		model.put("title", setup.getTitle());
 		model.put("additive", setup.isAdditive());
 		model.put("binary", setup.isBinaryMode());
+		model.put("root", request.getContextPath());
 		if (setup.isBinaryMode()) {
 			model.put("affirmativeMessage",setup.getAffirmativeMessage());
 			model.put("negativeMessage", setup.getNegativeMessage());
@@ -52,10 +75,11 @@ public class BaseController {
 	}
 
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/getDoc/{id}", method = RequestMethod.GET)
+	@RequestMapping(value = "/{project}/getDoc/{id}", method = RequestMethod.GET)
 	@ResponseBody
-	public String getDoc(@PathVariable String id) throws IOException {
+	public String getDoc(@PathVariable String project, @PathVariable String id) throws IOException {
 		logger.debug("BaseController - getDoc end point: {}",id);
+		getSetup(project);
 		JSONObject jo = new JSONObject();
 		jo.put("title", source.getDocTitle(id));
 		jo.put("guid", id);
@@ -63,10 +87,11 @@ public class BaseController {
 	}
 
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/getRandomDoc", method = RequestMethod.GET)
+	@RequestMapping(value = "/{project}/getRandomDoc", method = RequestMethod.GET)
 	@ResponseBody
-	public String getRandomDoc() throws IOException {
+	public String getRandomDoc(@PathVariable String project) throws IOException {
 		logger.debug("BaseController - getRandomDoc end point");
+		getSetup(project);
 		String randomId = source.getRandomId();
 		JSONObject jo = new JSONObject();
 		jo.put("guid", randomId);
@@ -75,55 +100,57 @@ public class BaseController {
 		return jo.toString();
 	}
 
-	@RequestMapping(value = "/getDocText/{id}", method = RequestMethod.GET)
+	@RequestMapping(value = "/{project}/getDocText/{id}", method = RequestMethod.GET)
 	@ResponseBody
-	public String getDocText(@PathVariable String id) throws IOException {
+	public String getDocText(@PathVariable String project, @PathVariable String id) throws IOException {
 		logger.debug("BaseController - getDocText end point, {}.",id);
+		getSetup(project);
 		return source.getDocText(id);
 	}
 
-	@RequestMapping(value = "/getTruthFor/{id}", method = RequestMethod.GET)
+	@RequestMapping(value = "/{project}/getTruthFor/{id}", method = RequestMethod.GET)
 	@ResponseBody
-	public String getTruthFor(@PathVariable String id) throws IOException {
+	public String getTruthFor(@PathVariable String project, @PathVariable String id) throws IOException {
 		logger.debug("BaseController - getTruthFor end point, {}.",id);
+		getSetup(project);
 		return truth.getTruthFor(id).toString();
 	}
 
-	@RequestMapping(value = "/getTagFor/{id}", method = RequestMethod.GET)
+	@RequestMapping(value = "/{project}/getTagFor/{id}", method = RequestMethod.GET)
 	@ResponseBody
-	public String getTagFor(@PathVariable String id) throws IOException {
+	public String getTagFor(@PathVariable String project, @PathVariable String id) throws IOException {
 		logger.debug("BaseController - getTruthFor end point, {}.",id);
+		getSetup(project);
 		return truth.getTagFor(id).toString();
 	}
 
-	@RequestMapping(value = "/setTruthFor/{id}", method = RequestMethod.GET)
+	@RequestMapping(value = "/{project}/setTruthFor/{id}", method = RequestMethod.GET)
 	@ResponseBody
-	public String setTruthFor(@PathVariable String id, String[] topics) throws IOException {
+	public String setTruthFor(@PathVariable String project, @PathVariable String id, String[] topics) throws IOException {
 		logger.debug("BaseController - setTruthFor end point, {} - {}",id,topics);
+		Setup setup = getSetup(project);
 		String res = truth.setTruthFor(id,topics).toString();
-		if (this.setup.isAdditive())
+		if (setup.isAdditive())
 			this.topics.updateTopicsWithTruth(topics);
 		return res;
 	}
 
-	@RequestMapping(value = "/setTagFor/{id}", method = RequestMethod.GET)
+	@RequestMapping(value = "/{project}/setTagFor/{id}", method = RequestMethod.GET)
 	@ResponseBody
-	public String setTagFor(@PathVariable String id, String tag, String reason) throws IOException {
+	public String setTagFor(@PathVariable String project, @PathVariable String id, String tag, String reason) throws IOException {
 		logger.debug("BaseController - setTagFor end point, {} - {} {}",id,tag, reason);
+		Setup setup = getSetup(project);
 		String res = truth.setTagFor(id,tag,reason).toString();
-		if (this.setup.isAdditive())
+		if (setup.isAdditive())
 			this.topics.updateTopicsWithTruth(tag);
 		return res;
 	}
 
-	@RequestMapping(value = "/getTopicsForCloud", method = RequestMethod.GET)
+	@RequestMapping(value = "/{project}/getTopicsForCloud", method = RequestMethod.GET)
 	@ResponseBody
-	public String getTopicsForCloud() throws IOException {
+	public String getTopicsForCloud(@PathVariable String project) throws IOException {
 		logger.debug("BaseController - getTopicsForCloud end point.");
+		getSetup(project);
 		return topics.getTopicsForCloud().toString();
-	}
-
-	public void setSource(DocumentSource source) {
-		this.source = source;
 	}
 }

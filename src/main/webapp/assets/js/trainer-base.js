@@ -1,10 +1,14 @@
 var unsavedData = false;
 var visited = new Array();
 var currentGuid;
+var project;
 
+function setProject(p) {
+	project = p;
+}
 function getDocText(targetId, file) {
 	$.ajax({
-		'url' : "getDocText/" + file,
+		'url' : project+"/getDocText/" + file,
 		type : 'GET',
 		dataType : 'html',
 		success : function(data) {
@@ -83,6 +87,26 @@ function setBindings() {
 	    }
 	});
 }
+
+function getWorkspaces() {
+	$.ajax({
+		'url' : "getWorkspaces",
+		type : 'GET',
+		dataType : 'html',
+		success : function(data) {
+			$("#workspaces").html(data);
+			setWorkspaceLinks();
+		}
+	});
+}
+
+function setWorkspaceLinks() {
+	$(".workspace-link").click(function() {
+		var ws = $(this).attr("id");
+		window.location.href=ws;
+	})
+}
+
 String.prototype.hashCode = function() {
 	var hash = 0, i, chr, len;
 	if (this.length == 0)

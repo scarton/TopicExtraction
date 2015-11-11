@@ -1,6 +1,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:c="http://www.springframework.org/schema/c"
 	xsi:schemaLocation="
         http://www.springframework.org/schema/mvc
         http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd     
@@ -29,23 +30,24 @@
         </property>
     </bean>
 	
-	<bean id="search" class="com.aitheras.trainer.search.SolrSearch" init-method="init">
-	   <property name="setup" ref="setup"/>
-	</bean>
-    <bean id="setup" class="com.aitheras.trainer.dao.Setup" init-method="init"/>
-    <!-- bean id="source" class="com.aitheras.trainer.dao.LuceneSource" init-method="init">
-           <property name="setup" ref="setup"/>
-    </bean -->
-    <!-- bean id="source" class="com.aitheras.trainer.dao.JSONFileSource" init-method="init">
-       <property name="setup" ref="setup"/>
-    </bean -->
-    <bean id="source" class="com.aitheras.trainer.dao.SolrSource" init-method="init">
-       <property name="setup" ref="setup"/>
+    <bean id="projectFactory" class="com.aitheras.trainer.dao.ProjectFactory" init-method="init">
+        <property name="projects" value="${project.list}"/>
+        <property name="cache" ref="cache"/>
     </bean>
-    <bean id="topics" class="com.aitheras.trainer.dao.JSONFileTopics" init-method="init">
-       <property name="setup" ref="setup"/>
-    </bean>
-    <bean id="truth" class="com.aitheras.trainer.dao.JSONFileTruth">
-       <property name="setup" ref="setup"/>
-    </bean>
+
+	<bean id="cacheBuilderSpec"
+	  class="com.google.common.cache.CacheBuilderSpec"
+	  factory-method="parse"
+	  c:cacheBuilderSpecification="${cacheSpecification}" />
+	
+	<bean id="cacheBuilderFromSpec"
+	  class="com.google.common.cache.CacheBuilder"
+	  factory-method="from"
+	  c:spec-ref="cacheBuilderSpec" />
+	
+	<bean id="cache"
+	  factory-bean="cacheBuilderFromSpec"
+	  factory-method="build" />
+	
+
 </beans>

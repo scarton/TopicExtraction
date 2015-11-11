@@ -2,14 +2,15 @@ var cloudTopics = new Array();
 
 function getRandomDoc(targetTitleID, targetId) {
 	$.ajax({
-		'url' : "getRandomDoc",
+		'url' : project+"/getRandomDoc",
 		type : 'GET',
 		dataType : 'json',
 		success : function(data) {
+			currentGuid=data.guid;
 			$("#" + targetTitleID).html(data.title);
 			visited.push(data.title);
-			getDocText(targetId, data.title);
-			makeTagsForDoc("topic-list", data.title)
+			getDocText(targetId, data.guid);
+			makeTagsForDoc("topic-list", data.guid)
 			$("#" + targetId).scrollTop(0);
 		}
 	});
@@ -20,13 +21,14 @@ function getPrevDoc(targetTitleID, targetId) {
 		var id=visited.last();
 		("Returning to "+id).flash();
 		$.ajax({
-			'url' : "getDoc/"+id,
+			'url' : project+"/getDoc/"+id,
 			type : 'GET',
 			dataType : 'json',
 			success : function(data) {
+				currentGuid=data.guid;
 				$("#" + targetTitleID).html(data.title);
-				getDocText(targetId, data.title);
-				makeTagsForDoc("topic-list", data.title)
+				getDocText(targetId, data.guid);
+				makeTagsForDoc("topic-list", data.guid)
 				$("#" + targetId).scrollTop(0);
 			}
 		});
@@ -61,7 +63,7 @@ function makeCloudArray(data) {
 }
 function setCloud(cloudID) {
 	$.ajax({
-		'url' : "getTopicsForCloud",
+		'url' : project+"/getTopicsForCloud",
 		type : 'GET',
 		dataType : 'json',
 		success : function(data) {
@@ -72,9 +74,9 @@ function setCloud(cloudID) {
 function assignCloudTopic2Doc(topic) {
 	$("#topic-list").tagit("createTag", topic);
 }
-function makeTagsForDoc(tagId, file) {
+function makeTagsForDoc(tagId, guid) {
 	$.ajax({
-		'url' : "getTruthFor/" + file,
+		'url' : project+"/getTruthFor/" + guid,
 		type : 'GET',
 		dataType : 'json',
 		success : function(data) {
@@ -91,9 +93,9 @@ function makeTagsForDoc(tagId, file) {
 	});
 	unsavedData = false;
 }
-function saveTagsForDoc(file, topics) {
+function saveTagsForDoc(guid, topics) {
 	$.ajax({
-		'url' : "setTruthFor/" + file + "?topics=" + topics,
+		'url' : project+"/setTruthFor/" + guid + "?topics=" + topics,
 		type : 'GET',
 		dataType : 'text',
 		success : function(data) {
@@ -106,24 +108,6 @@ function saveTagsForDoc(file, topics) {
 			("Error saving tags: "+errorThrown).flash();
 		}
 	});
-}
-function prevDoc() {
-	if (unsavedData) {
-		if (confirm("You have unsaved changes that will be lost. Please click 'Cancel' and then save your changes. Or click 'Okay' to continue and lose your changes")) {
-			getPrevDoc("doc-name", "document-content");
-		}
-	} else {
-		getPrevDoc("doc-name", "document-content");
-	}
-}
-function nextDoc() {
-	if (unsavedData) {
-		if (confirm("You have unsaved changes that will be lost. Please click 'Cancel' and then save your changes. Or click 'Okay' to continue and lose your changes")) {
-			getRandomDoc("doc-name", "document-content");
-		}
-	} else {
-		getRandomDoc("doc-name", "document-content");
-	}
 }
 function setupTopicList(additive) {
 	$("#topic-list").tagit({
@@ -144,66 +128,16 @@ function setupTopicList(additive) {
 		}
 	});
 }
-function setBindings(binary, additive) {
+function setTopicalBindings(additive) {
 	$.log("setting bindings, new topics can be created? " + additive);
-	$("#prev-button").click(function(){prevDoc();});
-	$("#next-button").click(function(){nextDoc();});
 	$("#save-button").click(
 		function() {
-			saveTagsForDoc($("#doc-name").text(), $("#topic-list").tagit("assignedTags"));
+			saveTagsForDoc(currentGuid, $("#topic-list").tagit("assignedTags"));
 			nextDoc();
 		});
-	if (!binary && additive) {
+	if (additive) {
 		$("#additive-message").text("You can create original topics or select from the cloud below.");
 	} else {
 		$("#additive-message").text("You cannot create new topics, only select topics from the cloud below.");
 	}
-	
-	$(window).bind('keydown', function(event) {
-	    if (event.ctrlKey || event.metaKey) {
-	        switch (String.fromCharCode(event.which).toLowerCase()) {
-	        case 's':
-	            event.preventDefault();
-				saveTagsForDoc($("#doc-name").text(), $("#topic-list").tagit("assignedTags"));
-	            break;
-	        }
-	    } else {
-//	        switch (event.which) {
-//	        case 39: // right
-//	            event.preventDefault();
-//	            nextDoc();
-//	            break;
-//	        case 37: // left
-//	            event.preventDefault();
-//	            prevDoc();
-//	            break;
-//	    	case 38: // up
-//	            event.preventDefault();
-//	            break;
-//            case 40: // down
-//	            event.preventDefault();
-//	            break;
-//	        }
-	    }
-	});
 }
-String.prototype.hashCode = function() {
-	var hash = 0, i, chr, len;
-	if (this.length == 0)
-		return hash;
-	for (i = 0, len = this.length; i < len; i++) {
-		chr = this.charCodeAt(i);
-		hash = ((hash << 5) - hash) + chr;
-		hash |= 0; // Convert to 32bit integer
-	}
-	return hash;
-};
-String.prototype.flash = function(){
-	$(".flash").html(this).fadeIn("fast");
-	setTimeout(function(){
-		$(".flash").fadeOut("slow");
-	}, 3500);
-}
-Array.prototype.last = function(){
-    return this[this.length - 1];
-};

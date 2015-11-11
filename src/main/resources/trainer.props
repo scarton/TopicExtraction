@@ -2,7 +2,6 @@
 # which should be in trainer.props (in the classpath) 
 # or a file named in -Dtrainer.props=xxx 
 
-
 name=Enron Collection          
 title=Personal Documents Model Training
 solrUrl=http://localhost:8983/solr/enron

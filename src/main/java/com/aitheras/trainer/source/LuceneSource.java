@@ -1,4 +1,4 @@
-package com.aitheras.trainer.dao;
+package com.aitheras.trainer.source;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -18,6 +18,8 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.NIOFSDirectory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.aitheras.trainer.dao.Setup;
 
 
 /**
@@ -63,12 +65,10 @@ public class LuceneSource implements DocumentSource {
 	    reader.close();
 	    return d;
 	}
-	public void setSetup(Setup setup) throws IOException {
+	@Override
+	public void init(Setup setup) throws IOException {
 		this.setup=setup;
 		indexStore = new NIOFSDirectory(Paths.get(setup.getIndexPath()));
-	}
-	@Override
-	public void init() throws IOException {
 		indexReader = DirectoryReader.open(indexStore);
 	}
 	@Override

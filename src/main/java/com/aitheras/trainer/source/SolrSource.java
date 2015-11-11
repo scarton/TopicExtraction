@@ -1,4 +1,4 @@
-package com.aitheras.trainer.dao;
+package com.aitheras.trainer.source;
 
 import java.io.IOException;
 import java.util.Random;
@@ -9,10 +9,10 @@ import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
-import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.aitheras.trainer.dao.Setup;
 import com.google.protobuf.TextFormat.ParseException;
 
 
@@ -98,14 +98,12 @@ public class SolrSource implements DocumentSource {
 		} else throw new IOException("Query for "+guid+" has "+results.getNumFound()+" results.");
 	}
 	@Override
-	public void init() {
+	public void init(Setup setup) {
+		this.setup=setup;
+		this.solr=new HttpSolrClient(setup.getSolrUrl());
 	}
 	@Override
 	public void close() throws IOException {
 		solr.close();
-	}
-	public void setSetup(Setup setup) {
-		this.setup=setup;
-		this.solr = new HttpSolrClient(setup.getSolrUrl());
 	}
 }
