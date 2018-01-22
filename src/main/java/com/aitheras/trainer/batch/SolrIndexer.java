@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
@@ -14,9 +14,9 @@ import org.slf4j.LoggerFactory;
 
 public class SolrIndexer {
 	final static Logger logger = LoggerFactory.getLogger(SolrIndexer.class);
-	private HttpSolrClient server;
-	public SolrIndexer(String baseURL) {
-		server = new HttpSolrClient(baseURL);
+	private CloudSolrClient server;
+	public SolrIndexer(String zkHost) {
+		server = new CloudSolrClient.Builder().withZkHost(zkHost).build();
 	}
 	public void index(String text, String id, String guid) throws IOException, SolrServerException {
 		index(text,id, guid, null, null);

@@ -25,7 +25,7 @@ public class IndexENRON {
 	final static Logger logger = LoggerFactory.getLogger(IndexENRON.class);
 	final static int INDEX_LIMIT=100; // Integer.MAX_VALUE
 	public static void main(String[] args) throws IOException, SolrServerException {
-		SolrIndexer indexer = new SolrIndexer("http://localhost:8983/solr/enron");
+		SolrIndexer indexer = new SolrIndexer("http://localhost:2181");
 		indexer.eraseIndex();
 		File srcF = new File(args[0]);
 		

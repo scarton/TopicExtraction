@@ -5,7 +5,7 @@ import java.util.Random;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
@@ -25,7 +25,7 @@ import com.google.protobuf.TextFormat.ParseException;
 public class SolrSource implements DocumentSource {
 	final static Logger logger = LoggerFactory.getLogger(SolrSource.class);
 	private Setup setup;
-	private HttpSolrClient solr;
+	private CloudSolrClient solr;
 	
 	public long maxDocs() throws IOException {
 	    SolrQuery q = new SolrQuery("*:*");
@@ -100,7 +100,7 @@ public class SolrSource implements DocumentSource {
 	@Override
 	public void init(Setup setup) {
 		this.setup=setup;
-		this.solr=new HttpSolrClient(setup.getSolrUrl());
+		this.solr= new CloudSolrClient.Builder().withZkHost(setup.getZkHost()).build();
 	}
 	@Override
 	public void close() throws IOException {

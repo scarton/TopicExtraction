@@ -38,6 +38,7 @@ public class Setup {
 	private String name;
 	private String title;
 	private String solrUrl;
+	private String zkHost;
 	private String indexPath;
 	private String masterTopicsFile;
 	private String affirmativeMessage;
@@ -192,5 +193,11 @@ public class Setup {
 
 	public void setTruthSource(TruthSource truthSource) {
 		this.truthSource = truthSource;
+	}
+	public String getZkHost() {
+		return zkHost;
+	}
+	public void setZkHost(String zkHost) {
+		this.zkHost = zkHost;
 	}
 }

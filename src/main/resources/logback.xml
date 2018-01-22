@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>/home/steve/logs/loader.log </file>
+        <file>/home/logs/loader.log </file>
     <!-- 
         <file>/home/logs/trainer.log </file>
         <file>/home/logs/loader.log </file>
