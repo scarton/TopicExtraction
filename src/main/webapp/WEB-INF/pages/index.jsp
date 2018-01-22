@@ -2,6 +2,7 @@
 <head>
     <link rel="icon" type="image/gif" href="assets/img/bookfavicon.png">
     <link rel="stylesheet" href="assets/css/foundation.css">
+    <link rel="stylesheet" href="assets/css/foundation-icons.css">
     <link rel="stylesheet" href="assets/css/trainer.css">
     <link rel="stylesheet" href="assets/css/vendor/jquery-ui.min.css">
     <script src="assets/js/vendor/jquery.js"></script>

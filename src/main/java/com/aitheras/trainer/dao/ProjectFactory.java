@@ -86,7 +86,8 @@ public class ProjectFactory {
 		StringBuilder sb = new StringBuilder();
 		for (int i=0; i<projects.size(); i++) {
 			JSONObject jo = (JSONObject)projects.get(i);
-			sb.append("<li><a href='#' class='workspace-link' id='"+jo.get("project")+"'>"+jo.get("name")+": "+jo.get("title")+"</a></li>\n");
+			String pid = (String)jo.get("project");
+			sb.append("<li><a href='#' class='workspace-link' id='"+pid+"'>"+jo.get("name")+": "+jo.get("title")+"</a><i class='fi-pencil small workspace-edit' id='"+pid+"'></i></li>\n");
 		}
 		return sb.toString();
 	}

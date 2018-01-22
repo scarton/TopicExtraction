@@ -102,6 +102,7 @@ function saveTagsForDoc(guid, topics) {
 			$.log("saveTagsForDoc returns: " + data);
 			unsavedData = false;
 			setCloud("tag-cloud");
+			nextDoc();
 			"Topics Saved.".flash();
 		},
 		error : function(jqXHR, textStatus, errorThrown) {
@@ -133,7 +134,6 @@ function setTopicalBindings(additive) {
 	$("#save-button").click(
 		function() {
 			saveTagsForDoc(currentGuid, $("#topic-list").tagit("assignedTags"));
-			nextDoc();
 		});
 	if (additive) {
 		$("#additive-message").text("You can create original topics or select from the cloud below.");

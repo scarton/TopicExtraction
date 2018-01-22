@@ -1,43 +1,63 @@
 package com.aitheras.nlp;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.io.StringReader;
-import java.io.StringWriter;
-import java.nio.CharBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.core.LowerCaseFilter;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.tika.metadata.Metadata;
-import org.apache.tika.parser.AutoDetectParser;
-import org.apache.tika.sax.TextContentHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.tidy.Tidy;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import com.sun.tools.hat.internal.parser.Reader;
+
+import opennlp.tools.sentdetect.SentenceDetectorME;
+import opennlp.tools.sentdetect.SentenceModel;
+import opennlp.tools.util.InvalidFormatException;
+import opennlp.tools.util.Span;
 
 public class TextCleaner {
 	final static Logger logger = LoggerFactory.getLogger(TextCleaner.class);
 	private static final int MINWORDLEN = 3;
 	private List<String> stopwords;
 	private List<String> scrubbedWords;
+	private List<String> regexes;
+	private Map<String,Span> sentences;
+	private String cleanedText;
+	private Spelling spelling;
+	SentenceModel model;
 	public TextCleaner() throws IOException {
+		loadSpelling();
 		loadStopwords();
+		loadSentenceModel();
+		loadRegexes();
+	}
+	private void loadRegexes() throws IOException {
+		InputStream in = this.getClass().getResourceAsStream("/cleaning.regexes.txt");	
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        regexes = new ArrayList<String>();
+        String line = reader.readLine();
+        while(line != null){
+        	String rx = line.trim();
+        	if (!line.startsWith("#")) {
+        		regexes.add(rx);
+        	}
+            line = reader.readLine();
+        }          
+	}
+	private void loadSpelling() throws IOException {
+		spelling = new Spelling();
+		spelling.setModel(SpellingModel.loadModel());
 	}
 	private void loadStopwords() throws IOException {
 		InputStream in = this.getClass().getResourceAsStream("/stopwords_en.txt");	
@@ -48,16 +68,38 @@ public class TextCleaner {
 //            System.out.println(line);
         	String sw = line.trim();
         	if (sw.length()>=MINWORDLEN  && !line.startsWith("#")) {
-        		logger.debug("Adding {} to stopword list",sw);
+//        		logger.debug("Adding {} to stopword list",sw);
         		stopwords.add(sw);
         	}
             line = reader.readLine();
         }          
 	}
-	public void cleanText(String ... inboundTexts) {
+	public void loadSentenceModel() throws InvalidFormatException, IOException {
+		InputStream modelIn = this.getClass().getClassLoader().getResourceAsStream("en-sent.bin");
+		logger.debug("Loading sentence model...");
+		model = new SentenceModel(modelIn);
+	}
+	public void parseSentences(String ... inboundTexts) {
+		sentences = new HashMap<String,Span>();
+		SentenceDetectorME sentenceDetector = new SentenceDetectorME(model);
+	    for (String raw : inboundTexts) {
+	    	Span[] sentences = sentenceDetector.sentPosDetect(raw);
+	    	for (Span sentence : sentences) {
+	    		CharSequence senText = sentence.getCoveredText(raw);
+	    		logger.debug("Sentence {}/{}: {}",sentence.getStart(),sentence.getEnd(),senText);
+	    	}
+	    }
+	}
+	public void cleanTextByRegex(String raw) { 
+		this.cleanedText=raw!=null?raw:"";
+		for (String regex : regexes) {
+			this.cleanedText = this.cleanedText.replaceAll(regex, "");
+		}
+	}
+	public void extractWords() {
 		try {
 		    final List<String> fields = Lists.newArrayList();
-		    for (String raw : inboundTexts) {
+//		    for (String raw : inboundTexts) {
 //		        Tidy t = new Tidy();
 //		        t.setErrout(new PrintWriter(new ByteArrayOutputStream()));
 //		        StringWriter out = new StringWriter();
@@ -77,13 +119,11 @@ public class TextCleaner {
 //		                fields.add(s);
 //		            }
 //		        }), new Metadata());
-		    }
+//		    }
 
 		    Analyzer analyzer = new StandardAnalyzer();
 //		    String joinedFields = Joiner.on(" ").join(fields).replaceAll("\\s+", " ");
-		    String joinedFields = Joiner.on(" ").join(inboundTexts).replaceAll("\\s+", " ");
-		    logger.debug("{}",joinedFields);
-		    StringReader in = new StringReader(joinedFields);
+		    StringReader in = new StringReader(this.cleanedText);
 		    TokenStream ts = analyzer.tokenStream("content", in);
 		    ts.reset();
 		    ts = new LowerCaseFilter(ts);
@@ -94,7 +134,7 @@ public class TextCleaner {
 		        char[] termBuffer = termAtt.buffer();
 		        int termLen = termAtt.length();
 		        String w = new String(termBuffer, 0, termLen);
-		        words.add(w);
+		        words.add(spelling.correct(w));
 		    }
 		    ts.end();
 		    ts.close();
@@ -116,6 +156,9 @@ public class TextCleaner {
 	}
 	public List<String> getScrubbedWords() {
 		return scrubbedWords;
+	}
+	public String getCleanedText() {
+		return cleanedText;
 	}
 
 }

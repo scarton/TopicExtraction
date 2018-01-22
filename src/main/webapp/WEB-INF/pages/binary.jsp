@@ -28,14 +28,18 @@
 <body>
 	<div class="row fullWidth">
 		<div class="large-12 columns">
-			<div class="nav-bar right">
-				<ul class="button-group">
+            <div class="nav-bar right">
+                <ul class="button-group">
                     <li><a href="#" id="prev-button" class="button small">Prev</a></li>
-					<li><a href="#" id="next-button" class="button small">Next</a></li>
-				</ul>
+                    <li><a href="#" id="next-button" class="button small">Next</a></li>
+                </ul>
                 <div class=""><a href="${root}">Return to Projects List</a></div>
-				<div class="flash"></div>
-			</div>
+                <div class="flash"></div>
+            </div>
+            <div class="nav-bar right">
+                <i class="gen-enclosed foundicon-search"><p>search</p></i>
+                <input type="text" id="query" placeholder="Search Terms"/>&nbsp;
+            </div>
 			<h1>
 				${name}
 			</h1>

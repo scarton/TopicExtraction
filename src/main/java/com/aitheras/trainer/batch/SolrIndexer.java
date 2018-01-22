@@ -1,8 +1,6 @@
 package com.aitheras.trainer.batch;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.List;
 
 import org.apache.solr.client.solrj.SolrQuery;
@@ -14,8 +12,6 @@ import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Joiner;
-
 public class SolrIndexer {
 	final static Logger logger = LoggerFactory.getLogger(SolrIndexer.class);
 	private HttpSolrClient server;
@@ -23,11 +19,12 @@ public class SolrIndexer {
 		server = new HttpSolrClient(baseURL);
 	}
 	public void index(String text, String id, String guid) throws IOException, SolrServerException {
-		index(text,id, guid, null);
+		index(text,id, guid, null, null);
 	}
-	public void index(String text, String id, String guid, List<String> terms) throws SolrServerException, IOException {
+	public void index(String text, String id, String guid, String cleanText, List<String> terms) throws SolrServerException, IOException {
 		SolrInputDocument  doc = new SolrInputDocument ();
 		doc.addField("doctext", text);
+		doc.addField("cleantext", cleanText);
 		doc.addField("docid", id);
 		doc.addField("guid", guid);
 		if (terms!=null) {
@@ -35,6 +32,12 @@ public class SolrIndexer {
 //			logger.debug("{}",Joiner.on(", ").join(terms));
 		}
 		server.add(doc);
+	}
+	public void eraseIndex() throws SolrServerException, IOException {
+		deleteByQuery("*:*");
+	}
+	public void deleteByQuery(String q) throws SolrServerException, IOException {
+		server.deleteByQuery(q);
 	}
 	public void testQuery(String qstr) throws IOException, SolrServerException {
 	    SolrQuery query = new SolrQuery();
@@ -48,7 +51,8 @@ public class SolrIndexer {
 	    SolrDocumentList results = response.getResults();
 	    for (int i = 0; i < results.size(); ++i) {
 	      System.out.println(results.get(i));
-	    }	}
+	    }
+    }
 	public void commit() throws SolrServerException, IOException {
 		server.commit();
 	}
